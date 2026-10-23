@@ -50,6 +50,7 @@ export interface LoanApplicationDraft {
 }
 export interface TimelineEvent { status: ApplicationStatus; at: string; by: string; note: string }
 export interface LoanApplication extends LoanApplicationDraft {
+  customerUpdate?: { customerMessage: string; missingDocuments: string[] } | null;
   applicationId: string; customerId: string; status: ApplicationStatus; createdAt: string; updatedAt: string;
   estimatedEmi: number | null; timeline: TimelineEvent[]; latestRecommendation?: AgentRecommendation | null;
 }

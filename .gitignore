@@ -16,3 +16,5 @@ backend/.cache/
 backend/uploads/
 
 docker-compose.override.yml
+
+.playwright-mcp/

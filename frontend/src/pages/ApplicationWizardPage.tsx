@@ -86,6 +86,8 @@ export function ApplicationWizardPage() {
   };
 
   const handleSaveDraft = async (stepToGo?: number) => {
+    setSubmissionError(null);
+    try {
     const targetStep = stepToGo ?? currentStep;
     const payload: LoanApplicationDraft = {
       ...draft,
@@ -103,6 +105,10 @@ export function ApplicationWizardPage() {
       showSaveNotice();
       if (stepToGo) setCurrentStep(stepToGo);
       return saved;
+    }
+    } catch (err) {
+      setSubmissionError(err);
+      return null;
     }
   };
 

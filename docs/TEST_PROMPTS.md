@@ -744,8 +744,12 @@ Final `MAX_DISTANCE = 0.32`: above the worst relevant top-1 distance 0.297129, b
 - AI SDK warns that provider-enforced JSON schemas are unavailable with this compatibility setting. Responses are still parsed/validated with Zod by the SDK, and schema/provider failures become 503. No warning is hidden.
 - Provider calls now have a 20-second abort timeout per attempt; structured calls retry once. Communication/reason wording falls back to templates, while policy retrieval/extraction failures never answer from general knowledge.
 
-## Remaining integration work (not claimed as verified)
+## Historical S2 handoff (resolved by full-stack integration)
 
 `contract: integrate S1 core services and auth`: S1 must supply its real `core/**/service.ts`, `core/emi/loanMath.ts`, login routes and seed. Then change only `ai/coreBridge.ts` to map real S1 shapes into the Ai* interfaces, move the stub to test-only storage per S2 step 3.0, and rerun the login-based full verification block on merged main. No S1 or frontend file was edited in this pass. There is no git remote on this checkout, so no remote PR or merge was possible.
 
 Clean-machine Docker startup and frontend integration were not run. Existing Postgres on localhost:5433 was used; Docker's snap wrapper failed with an AppArmor confinement error when queried.
+
+## Full-stack integration acceptance — 2026-10-23
+
+S1 core/login/seed and S3 are now merged. Current evidence superseding the pre-merge handoff above: `docs/evidence/browser-qa.json` (real draft/reload/uploads/submit/workflow/customer status and role permissions), `live-ai-browser-qa.json` (actual advisor and policy admin lifecycle), `responsive-qa.json` (57 checks across six users at three widths), `production-smoke.json` (built app and API on localhost:8080). Final tests: backend103 /21files; frontend14 /5files. Both builds and both npm audits pass.

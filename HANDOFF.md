@@ -1,154 +1,36 @@
-# S3 Frontend Handoff
+# LoanLens AI — integration handoff
 
-## 1. What is Finished and Working
+## Current state
 
-### Foundation & Infrastructure
-- **Vite + React 19 + TypeScript + Tailwind CSS v4**: Scaffolded with `@tailwindcss/vite` and CSS token definitions in `frontend/src/styles/tokens.css` (supporting light/dark theme).
-- **API Typing & Client**:
-  - `frontend/src/api/types.ts` mirrors the schemas and enums from `openapi.yaml`.
-  - `frontend/src/api/client.ts` implements the unified HTTP client with `ApiError` envelope parsing and bearer auth injection.
-- **MSW Mock Service Worker**:
-  - `frontend/src/mocks/` (`fixtures.ts`, `handlers.ts`, `browser.ts`, `server.ts`) implements in-memory mocks for all required API endpoints.
-  - Browser worker integration initialized via `frontend/public/mockServiceWorker.js`.
-- **Formatting Utilities**:
-  - Currency and percentage formatting in `frontend/src/lib/formatInr.ts` (tested in `frontend/src/lib/formatInr.test.ts`).
-  - Date/time formatting in `frontend/src/lib/formatDate.ts`.
-- **Core UI Components**:
-  - Standard primitives in `frontend/src/components/ui/` (`Button`, `Card`, `Badge`, `Money`, `Field`, `EmptyState`, `ErrorAlert`, `Skeleton`, `AiTag`, `RoleBadge`, `MockBadge`).
+The integrated app is a React 19, TypeScript and Vite frontend backed by a Node.js Express API using Prisma. The AI services are in `backend/src/ai`; they call the real S1 core services through `backend/src/ai/coreBridge.ts`. The frontend's HTTP client is `frontend/src/api/client.ts`, and feature requests are organized under `frontend/src/api/hooks/`. This is not a Spring Boot/FastAPI deployment.
 
-### Authentication & Routing
-- `frontend/src/auth/AuthContext.tsx` handles authentication state, local storage persistence, and role switching.
-- `frontend/src/routes/RoleGuard.tsx` enforces role-based access control (tested in `frontend/src/routes/RoleGuard.test.tsx`).
-- `frontend/src/routes/router.tsx` defines the client route tree for all user personas.
-- `frontend/src/pages/LoginPage.tsx` supports credentialed login and one-click quick switch across all four roles:
-  - `CUSTOMER` (`ananya`)
-  - `LOAN_OFFICER` (`vikram`)
-  - `CREDIT_ANALYST` (`priya`)
-  - `POLICY_ADMIN` (`aditi`)
+The live configuration in the repository root `.env` selects the real API (`VITE_USE_MOCKS=false`) at `http://localhost:8080`; Vite serves the frontend at `http://localhost:5173`. The optional MSW mocks remain available when explicitly enabled. In mock mode the app displays a `MOCK DATA` badge.
 
-### Customer Portal
-- **Product Discovery & Comparison**:
-  - `frontend/src/pages/CataloguePage.tsx` with filtering by category and amount range.
-  - `frontend/src/pages/ProductDetailPage.tsx` showing product specifications and embedded EMI calculator.
-  - `frontend/src/pages/ComparePage.tsx` with comparative attribute tables.
-  - `frontend/src/pages/EmiPage.tsx` with repayment schedule breakdown.
-- **AI Loan Advisor**:
-  - `frontend/src/pages/AdvisorPage.tsx` with interactive chat panel, recommendation cards, confidence badges, and source citations.
-- **Customer Policy Query**:
-  - `frontend/src/pages/PolicyPage.tsx` providing conversational Q&A against active policy guidelines.
-- **Profile Management**:
-  - `frontend/src/pages/ProfilePage.tsx` viewing and updating profile attributes.
-- **Loan Application Wizard**:
-  - `frontend/src/pages/ApplicationWizardPage.tsx` multi-step application workflow (Product Selection, Employment & Income, Document Upload, Review & Submit) with draft auto-save and resumption (tested in `frontend/src/pages/ApplicationWizard.test.tsx`).
-- **Application Tracking**:
-  - `frontend/src/pages/MyApplicationsPage.tsx` list of customer applications.
-  - `frontend/src/pages/StatusTrackerPage.tsx` with status progression timeline.
+## App paths and roles
 
-### Staff Consoles
-- **Loan Officer Queue**:
-  - `frontend/src/pages/OfficerQueuePage.tsx` with queue filtering and SLA indicators.
-- **Credit Analyst Review**:
-  - `frontend/src/pages/AnalystReviewPage.tsx` with automated checks breakdown (`AgentChecksTable`), audit log inspection (`AuditTrailViewer`), and human-in-the-loop decisioning (`DecisionForm`).
-- **Staff Knowledge Base**:
-  - `frontend/src/pages/KnowledgePage.tsx` displaying active policies in force.
-- **Policy Admin Console**:
-  - `frontend/src/pages/PolicyLibraryPage.tsx` with policy listings and version history.
-  - `frontend/src/pages/PolicyDetailPage.tsx` featuring version timeline, markdown preview, test query panel, and publish/retire modal dialogs (tested in `frontend/src/pages/PolicyDetailPage.test.tsx`).
-  - `frontend/src/pages/PolicyUploadPage.tsx` for drafting new policy versions.
+- Customer: loan catalogue and comparison, EMI calculator, advisor and policy assistant, profile, application draft/upload/submission, application status.
+- Loan officer: application queue and workflow, policy assistant, knowledge base, product catalogue.
+- Credit analyst: review queue, persisted AI recommendation and audit trail, human decision controls, policy assistant and knowledge base.
+- Policy admin: versioned policy library, upload, preview, test query, publish and retire flows.
 
-### Unit & Component Tests
-- Vitest test suite currently passes all 4 test files (12 tests passed):
-  - `src/lib/formatInr.test.ts`
-  - `src/routes/RoleGuard.test.tsx`
-  - `src/pages/ApplicationWizard.test.tsx`
-  - `src/pages/PolicyDetailPage.test.tsx`
+Routes and role guards are in `frontend/src/routes/router.tsx` and `frontend/src/routes/RoleGuard.tsx`. Role-aware navigation and the responsive shell are in `frontend/src/layouts/AppLayout.tsx`; shared styles are in `frontend/src/styles/app.css` and tokens in `frontend/src/styles/tokens.css`.
 
----
+## Verification evidence
 
-## 2. What is Half-Done or Broken
+`docs/evidence/browser-qa.json` records 16 passed browser checks, no uncaught runtime errors, and a 404 API error for the workflow recommendation URL. The checks cover live catalogue/filter/compare/EMI requests, draft resumption, real document upload and application submission without address proof, role restrictions, officer handling of the missing proof, analyst recommendation/audit review, policy-admin landing, mobile navigation, and no horizontal overflow at 390px. Captured screens are `emi-desktop`, `customer-status-desktop`, `officer-review-desktop`, `analyst-review-desktop`, `policy-library-desktop`, `catalogue-mobile-final`, and `catalogue-mobile-dark`; see `docs/evidence/`.
 
-### TypeScript Build Failure
-- **File**: `frontend/src/components/emi/EmiTable.tsx`
-- **Location**: Line 58, Column 37
-- **Exact Error**:
-  ```
-  src/components/emi/EmiTable.tsx:58:37 - error TS6133: 'i' is declared but its value is never read.
+Final integration checks: backend 103 tests across 21 files; frontend 14 tests across 5 files, both on Vitest 4.1.12. Both TypeScript/build commands pass, both npm audits report zero findings. Prisma CLI and client are pinned together at 6.12.0 and regenerated. CSV ingestion uses patched csv-parse 7.0.3; parser and ingestion tests pass.
 
-  58     const rows = schedule.map((row, i) =>
-                                         ~
+## Running locally
 
-  Found 1 error.
-  ```
-  *(Per handoff instructions, this was recorded as-is without fixing).*
+Start the backend and frontend using their package scripts and the repository's configured database/environment. The frontend dev server runs from `frontend/` with `npm run dev`; backend scripts and prerequisites are in `backend/package.json` and `docs/SETUP.md`. Keep the root `.env` pointed at the intended mock/live mode. Do not commit credentials or local environment files.
 
-### Live Backend Integration
-- The frontend has only been run and verified against MSW mock endpoints; full integration against real Spring Boot (S1) and FastAPI AI agent (S2) backends is not yet validated.
+## Known evidence caveat
 
----
+The browser evidence includes a 404 for `workflow/applications/LA-2026-28805/recommendation`; the overall run has no uncaught browser errors, but that endpoint response is an API error and should not be described as a clean success. The evidence file does not establish a comprehensive accessibility audit or full responsive coverage beyond the specific checks listed above.
 
-## 3. What is Not Started (from S3 Spec: `docs/prompts/S3_frontend.md` / `prompts/S3_frontend.md`)
+## Final browser and production checks
 
-- **Step 3.6 — Real Backend Integration & Live Scenario Testing**:
-  - Toggling `VITE_USE_MOCKS=false` against the merged backend services.
-  - Running end-to-end verification of the 3 brief scenarios (Salaried, Self-Employed, Low Credit) and the policy versioning workflow against the live backend.
-- **Step 3.7 — Judge Live-Change Verification Walkthrough**:
-  - Verification of live component changes documented in `Component_Change_Manual.md`.
-- **Comprehensive Accessibility / Screen-Reader Audits**:
-  - Automated Axe / Lighthouse audit passes on the production bundle.
-- **End-to-End Browser Automation**:
-  - Playwright / Cypress integration tests.
+`docs/evidence/live-ai-browser-qa.json` records live advisor ₹10,871, off-topic refusal, policy draft upload, isolated draft test-ask, publish confirmation and retire/rollback. `responsive-qa.json` records 57 checks across all six demo users at 390/768/1440px with no page-level overflow or runtime errors. `production-smoke.json` verifies built frontend login, API access and nested-route reload on Express at localhost:8080. A 404 recommendation response before the first workflow run is expected absence, handled as an empty state; it is not a failed workflow.
 
----
-
-## 4. How to Run the Frontend and Mock Status
-
-### How to Run
-From the repository root:
-```bash
-cd frontend
-npm install
-npm run dev
-```
-The development server starts at `http://localhost:5173/`.
-
-To run the unit and component tests:
-```bash
-cd frontend
-npm test
-```
-
-### Mock State
-- **Currently Uses Mocks**: **YES** (MSW is active).
-- Configuration: Set in repo-root `.env`:
-  ```env
-  VITE_USE_MOCKS=true
-  VITE_API_BASE_URL=http://localhost:8080
-  ```
-- Visual indicator: A visible amber badge (`MOCK DATA`) is rendered in the top application navigation bar when mocks are active.
-- To switch to real backend: Update `.env` to `VITE_USE_MOCKS=false`.
-
----
-
-## 5. Result of `npm run build`
-
-Command executed:
-```bash
-npm run build
-```
-(in directory `frontend/`)
-
-Exit Code: `2`
-
-Output:
-```
-> frontend@0.0.0 build
-> tsc -b && vite build
-
-src/components/emi/EmiTable.tsx:58:37 - error TS6133: 'i' is declared but its value is never read.
-
-58     const rows = schedule.map((row, i) =>
-                                       ~
-
-
-Found 1 error.
-```
+`customerUpdate` is a safe projection on the owning customer's application, containing only `customerMessage` and `missingDocuments`; the customer status UI never requests the staff-only recommendation endpoint. Draft save failures remain visible without losing fields. Final credit transitions compare current status inside the update transaction, so concurrent decisions cannot overwrite each other.

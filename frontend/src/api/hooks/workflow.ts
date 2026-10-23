@@ -18,7 +18,7 @@ export function useRunWorkflow(id?: string) {
   });
 }
 
-export function useRecommendation(id?: string) {
+export function useRecommendation(id?: string, enabled = true) {
   return useQuery<AgentRecommendation | null, Error>({
     queryKey: ['recommendation', id],
     queryFn: async () => {
@@ -31,6 +31,6 @@ export function useRecommendation(id?: string) {
         throw err;
       }
     },
-    enabled: Boolean(id),
+    enabled: Boolean(id) && enabled,
   });
 }

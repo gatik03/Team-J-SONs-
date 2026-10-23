@@ -9,11 +9,15 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { ErrorAlert } from '../components/ui/ErrorAlert';
 import { Button } from '../components/ui/Button';
 import { AlertCircle, FileText } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
+import { StepDocuments } from '../components/applications/steps/StepDocuments';
 
 export function StatusTrackerPage() {
   const { applicationId } = useParams<{ applicationId: string }>();
   const { data: application, isLoading, error } = useApplication(applicationId);
-  const { data: recommendation } = useRecommendation(applicationId);
+  const { user } = useAuth();
+  const { data: staffRecommendation } = useRecommendation(applicationId, user?.role !== 'CUSTOMER');
+  const recommendation = application?.customerUpdate ?? staffRecommendation;
   const { data: products } = useProducts();
 
   if (isLoading) {
@@ -123,6 +127,12 @@ export function StatusTrackerPage() {
         </div>
       )}
 
+      {user?.role === 'CUSTOMER' && !['APPROVED', 'REJECTED', 'DISBURSED'].includes(application.status) && (
+        <section className="bg-surface border border-border rounded-lg p-6 space-y-4">
+          <h2 className="text-h2 font-semibold">Add or update your documents</h2>
+          <StepDocuments applicationId={application.applicationId} />
+        </section>
+      )}
       {/* Verification Timeline */}
       <div className="bg-surface border border-border rounded-lg shadow-card p-6 space-y-4">
         <h3 className="text-h3 font-bold text-fg">Application Progress</h3>

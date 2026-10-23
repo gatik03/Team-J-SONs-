@@ -13,7 +13,7 @@ import { AdvisorResponseSchema } from '../advisor/schemas';
 import { AgentRecommendationSchema } from '../agents/schemas';
 import { SAFE_ANSWER } from '../rag/schemas';
 
-// Real HTTP/auth, parsers, pgvector, policy lifecycle, agents and audit persistence; only external AI is replaced.
+// Real HTTP/auth, parsers, pgvector, agents and persisted audit; external AI and the core fixture are isolated test doubles.
 vi.mock('../coreBridge', async () => await import('../stub/core'));
 vi.mock('../rag/embeddings', () => ({
   embedDocuments: vi.fn(async (texts: string[]) => texts.map(() => Array(768).fill(1 / Math.sqrt(768)))),

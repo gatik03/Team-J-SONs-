@@ -1,171 +1,174 @@
-import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router';
-import { LogOut, Menu, Moon, Sun, X } from 'lucide-react';
-import { useAuth } from '../auth/AuthContext';
-import { navByRole } from '../routes/nav';
-import { RoleBadge } from '../components/ui/RoleBadge';
-import { MockBadge } from '../components/ui/MockBadge';
-
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, Link } from "react-router";
+import {
+  Landmark,
+  LayoutGrid,
+  Calculator,
+  MessageSquare,
+  Files,
+  UserRound,
+  BookOpen,
+  LogOut,
+  Menu,
+  Sun,
+  Moon,
+  ShieldCheck,
+  ArrowUpRight,
+} from "lucide-react";
+import { useAuth } from "../auth/AuthContext";
+import { USE_MOCKS } from "../api/client";
+const human = (s: string) =>
+  s
+    .replaceAll("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+const customer = [
+  ["/products", "Explore loans", LayoutGrid],
+  ["/emi", "EMI calculator", Calculator],
+  ["/advisor", "Loan advisor", MessageSquare],
+  ["/policy", "Policy assistant", BookOpen],
+  ["/applications", "My applications", Files],
+  ["/profile", "My profile", UserRound],
+] as const;
+const staff = [
+  ["/officer/queue", "Application queue", Files],
+  ["/policy", "Policy assistant", MessageSquare],
+  ["/knowledge", "Policies in force", BookOpen],
+  ["/products", "Explore loans", LayoutGrid],
+] as const;
+const admin = [
+  ["/admin/policies", "Policy library", BookOpen],
+  ["/policy", "Policy assistant", MessageSquare],
+] as const;
 export function AppLayout() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    try {
-      const stored = localStorage.getItem('ll-theme');
-      if (stored) return stored === 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    } catch {
-      return false;
-    }
-  });
-
+  const [open, setOpen] = useState(false);
+  const [dark, setDark] = useState(
+    document.documentElement.dataset.theme === "dark",
+  );
+  const nav =
+    user?.role === "CUSTOMER"
+      ? customer
+      : user?.role === "POLICY_ADMIN"
+        ? admin
+        : staff;
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.dataset.theme = 'dark';
-      try {
-        localStorage.setItem('ll-theme', 'dark');
-      } catch {
-        // ignore
+    if (!open) return;
+    document.querySelector<HTMLElement>("#workspace-navigation nav a")?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        document.querySelector<HTMLElement>('[aria-controls="workspace-navigation"]')?.focus();
       }
-    } else {
-      delete document.documentElement.dataset.theme;
-      try {
-        localStorage.setItem('ll-theme', 'light');
-      } catch {
-        // ignore
-      }
-    }
-  }, [isDark]);
-
-  if (!user) return null;
-
-  const navItems = navByRole[user.role] ?? [];
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
   return (
-    <div className="min-h-screen bg-bg text-fg flex flex-col font-sans">
-      {/* Skip Link */}
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-md focus:shadow-pop"
-      >
+    <div className="app-shell">
+      <a className="skip" href="#main">
         Skip to content
       </a>
-
-      {/* Header */}
-      <header className="bg-surface border-b border-border sticky top-0 z-40">
-        <div className="mx-auto max-w-[1200px] px-4 md:px-6 xl:px-8 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-8">
-            <span className="text-primary font-semibold text-lg flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>
-              Kestrel Bank · LoanLens
-            </span>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1 h-16">
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `px-3 h-16 inline-flex items-center text-sm font-medium border-b-2 transition-colors focus-ring ${
-                      isActive
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted hover:text-fg'
-                    }`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
-            <button
-              type="button"
-              onClick={() => setIsDark((prev) => !prev)}
-              className="p-2 rounded-md hover:bg-surface-2 text-muted hover:text-fg transition-colors focus-ring"
-              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            {/* User Details */}
-            <div className="hidden sm:flex items-center gap-2">
-              <RoleBadge role={user.role} />
-              <span className="text-sm font-medium text-fg truncate max-w-[140px]">
-                {user.displayName}
-              </span>
-            </div>
-
-            {/* Logout Button */}
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="p-2 rounded-md hover:bg-surface-2 text-muted hover:text-danger transition-colors focus-ring"
-              title="Logout"
-              aria-label="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-
-            {/* Hamburger Button for Mobile */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-menu"
-              className="md:hidden p-2 rounded-md hover:bg-surface-2 text-muted hover:text-fg transition-colors focus-ring"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
+      <aside
+        id="workspace-navigation"
+        className={open ? "sidebar open" : "sidebar"}
+      >
+        <Link className="brand" to="/">
+          <span className="brand-mark">
+            <Landmark size={22} />
+          </span>
+          <span>
+            Kestrel Bank<small>LoanLens</small>
+          </span>
+        </Link>
+        <div className="workspace-label">YOUR WORKSPACE</div>
+        <nav aria-label="Main navigation">
+          {nav.map(([to, label, Icon]) => (
+            <NavLink key={to} to={to} onClick={() => setOpen(false)}>
+              <Icon size={19} />
+              {label}
+              <ArrowUpRight size={15} className="nav-arrow" />
+            </NavLink>
+          ))}
+        </nav>
+        <div className="sidebar-note">
+          <ShieldCheck size={23} />
+          <strong>
+            A little clarity.
+            <br />A better next step.
+          </strong>
+          <p>Banking built around your ambitions. Decisions made by people.</p>
         </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div
-            id="mobile-menu"
-            className="md:hidden border-t border-border bg-surface px-4 py-3 space-y-2 shadow-pop"
+        <div className="sidebar-foot">
+          KESTREL BANK <span>Secure workspace</span>
+        </div>
+      </aside>
+      {open && (
+        <button
+          className="mobile-backdrop"
+          aria-label="Close navigation"
+          onClick={() => setOpen(false)}
+        />
+      )}
+      <div className="workspace">
+        <header className="topbar">
+          <button
+            className="icon-button mobile-menu"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle navigation"
+            aria-expanded={open}
+            aria-controls="workspace-navigation"
           >
-            <div className="flex items-center gap-2 pb-2 mb-2 border-b border-border">
-              <RoleBadge role={user.role} />
-              <span className="text-sm font-medium">{user.displayName}</span>
-            </div>
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `block px-3 py-2 rounded-md text-sm font-medium transition-colors focus-ring ${
-                    isActive ? 'bg-primary-soft text-primary' : 'text-fg hover:bg-surface-2'
-                  }`
+            <Menu size={22} />
+          </button>
+          <span className="topbar-title">Your next chapter starts here.</span>
+          <div className="topbar-actions">
+            {USE_MOCKS && <span className="badge amber">MOCK DATA</span>}
+            <button
+              className="icon-button"
+              aria-label="Toggle color theme"
+              onClick={() => {
+                const next = !dark;
+                setDark(next);
+                document.documentElement.dataset.theme = next
+                  ? "dark"
+                  : "light";
+                try {
+                  localStorage.setItem("ll-theme", next ? "dark" : "light");
+                } catch {
+                  /* Optional preference. */
                 }
-              >
-                {item.label}
-              </NavLink>
-            ))}
+              }}
+            >
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <span className="avatar">{user?.displayName?.charAt(0)}</span>
+            <div className="user-meta">
+              <strong>{user?.displayName}</strong>
+              <small>{human(user?.role ?? "")}</small>
+            </div>
+            <button
+              className="icon-button"
+              aria-label="Sign out"
+              onClick={logout}
+            >
+              <LogOut size={18} />
+            </button>
           </div>
-        )}
-      </header>
-
-      {/* Main Container */}
-      <main id="main" className="mx-auto max-w-[1200px] w-full px-4 md:px-6 xl:px-8 py-6 flex-1">
-        <Outlet />
-      </main>
-
-      {/* Mock Badge */}
-      <MockBadge />
+        </header>
+        <main id="main">
+          <Outlet />
+        </main>
+        <footer className="main-footer">
+          <span>
+            © {new Date().getFullYear()} Kestrel Bank. Synthetic hackathon
+            demonstration.
+          </span>
+          <span>
+            <ShieldCheck size={13} /> Role-based access
+          </span>
+        </footer>
+      </div>
     </div>
   );
 }

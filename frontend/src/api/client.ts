@@ -1,6 +1,6 @@
 import type { ErrorResponse } from './types';
 
-export const API_BASE: string = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
+export const API_BASE: string = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 export const AUTH_STORAGE_KEY = 'll-auth';
 export const USE_MOCKS: boolean = import.meta.env.VITE_USE_MOCKS === 'true';
 
@@ -62,7 +62,9 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
   }
 
   const text = await res.text();
-  const data: unknown = text ? JSON.parse(text) : null;
+  let data: unknown;
+  try { data = text ? JSON.parse(text) : null; }
+  catch { throw new ApiError({status: res.status, code: 'INTERNAL', message: 'The server returned an unexpected response. Please try again.', timestamp: new Date().toISOString()}); }
   if (!res.ok) {
     throw new ApiError(
       (data as ErrorResponse | null) ?? {

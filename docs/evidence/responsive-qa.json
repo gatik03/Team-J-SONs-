@@ -1,0 +1,405 @@
+{
+  "checks": [
+    {
+      "role": "customer",
+      "route": "/products",
+      "width": 390,
+      "document": 390,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "customer",
+      "route": "/emi",
+      "width": 390,
+      "document": 390,
+      "h1": "EMI calculator"
+    },
+    {
+      "role": "customer",
+      "route": "/advisor",
+      "width": 390,
+      "document": 390,
+      "h1": "Loan Advisor"
+    },
+    {
+      "role": "customer",
+      "route": "/policy",
+      "width": 390,
+      "document": 390,
+      "h1": "Policy Assistant"
+    },
+    {
+      "role": "customer",
+      "route": "/profile",
+      "width": 390,
+      "document": 390,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "customer",
+      "route": "/applications",
+      "width": 390,
+      "document": 390,
+      "h1": "My Applications"
+    },
+    {
+      "role": "customer",
+      "route": "/applications/new",
+      "width": 390,
+      "document": 390,
+      "h1": "New Loan Application"
+    },
+    {
+      "role": "customer",
+      "route": "/applications/LA-2026-28805/status",
+      "width": 390,
+      "document": 390,
+      "h1": "Status Tracker"
+    },
+    {
+      "role": "customer",
+      "route": "/products",
+      "width": 768,
+      "document": 768,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "customer",
+      "route": "/emi",
+      "width": 768,
+      "document": 768,
+      "h1": "EMI calculator"
+    },
+    {
+      "role": "customer",
+      "route": "/advisor",
+      "width": 768,
+      "document": 768,
+      "h1": "Loan Advisor"
+    },
+    {
+      "role": "customer",
+      "route": "/policy",
+      "width": 768,
+      "document": 768,
+      "h1": "Policy Assistant"
+    },
+    {
+      "role": "customer",
+      "route": "/profile",
+      "width": 768,
+      "document": 768,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "customer",
+      "route": "/applications",
+      "width": 768,
+      "document": 768,
+      "h1": "My Applications"
+    },
+    {
+      "role": "customer",
+      "route": "/applications/new",
+      "width": 768,
+      "document": 768,
+      "h1": "New Loan Application"
+    },
+    {
+      "role": "customer",
+      "route": "/applications/LA-2026-28805/status",
+      "width": 768,
+      "document": 768,
+      "h1": "Status Tracker"
+    },
+    {
+      "role": "customer",
+      "route": "/products",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "customer",
+      "route": "/emi",
+      "width": 1440,
+      "document": 1440,
+      "h1": "EMI calculator"
+    },
+    {
+      "role": "customer",
+      "route": "/advisor",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Loan Advisor"
+    },
+    {
+      "role": "customer",
+      "route": "/policy",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Policy Assistant"
+    },
+    {
+      "role": "customer",
+      "route": "/profile",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "customer",
+      "route": "/applications",
+      "width": 1440,
+      "document": 1440,
+      "h1": "My Applications"
+    },
+    {
+      "role": "customer",
+      "route": "/applications/new",
+      "width": 1440,
+      "document": 1440,
+      "h1": "New Loan Application"
+    },
+    {
+      "role": "customer",
+      "route": "/applications/LA-2026-28805/status",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Status Tracker"
+    },
+    {
+      "role": "officer",
+      "route": "/officer/queue",
+      "width": 390,
+      "document": 390,
+      "h1": "Officer Review Queue"
+    },
+    {
+      "role": "officer",
+      "route": "/analyst/review/LA-2026-28805",
+      "width": 390,
+      "document": 390,
+      "h1": "Application Review"
+    },
+    {
+      "role": "officer",
+      "route": "/knowledge",
+      "width": 390,
+      "document": 390,
+      "h1": "Policies in force"
+    },
+    {
+      "role": "officer",
+      "route": "/officer/queue",
+      "width": 768,
+      "document": 768,
+      "h1": "Officer Review Queue"
+    },
+    {
+      "role": "officer",
+      "route": "/analyst/review/LA-2026-28805",
+      "width": 768,
+      "document": 768,
+      "h1": "Application Review"
+    },
+    {
+      "role": "officer",
+      "route": "/knowledge",
+      "width": 768,
+      "document": 768,
+      "h1": "Policies in force"
+    },
+    {
+      "role": "officer",
+      "route": "/officer/queue",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Officer Review Queue"
+    },
+    {
+      "role": "officer",
+      "route": "/analyst/review/LA-2026-28805",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Application Review"
+    },
+    {
+      "role": "officer",
+      "route": "/knowledge",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Policies in force"
+    },
+    {
+      "role": "analyst",
+      "route": "/analyst/review/LA-2026-28805",
+      "width": 390,
+      "document": 390,
+      "h1": "Application Review"
+    },
+    {
+      "role": "analyst",
+      "route": "/analyst/review/LA-2026-28805",
+      "width": 768,
+      "document": 768,
+      "h1": "Application Review"
+    },
+    {
+      "role": "analyst",
+      "route": "/analyst/review/LA-2026-28805",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Application Review"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies",
+      "width": 390,
+      "document": 390,
+      "h1": "Policy library"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies/VEHICLE-TNC",
+      "width": 390,
+      "document": 390,
+      "h1": "Vehicle Loan Terms and Conditions"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies/new",
+      "width": 390,
+      "document": 390,
+      "h1": "Upload policy version"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies",
+      "width": 768,
+      "document": 768,
+      "h1": "Policy library"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies/VEHICLE-TNC",
+      "width": 768,
+      "document": 768,
+      "h1": "Vehicle Loan Terms and Conditions"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies/new",
+      "width": 768,
+      "document": 768,
+      "h1": "Upload policy version"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Policy library"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies/VEHICLE-TNC",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Vehicle Loan Terms and Conditions"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/policies/new",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Upload policy version"
+    },
+    {
+      "role": "self-employed",
+      "route": "/products",
+      "width": 390,
+      "document": 390,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "self-employed",
+      "route": "/profile",
+      "width": 390,
+      "document": 390,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "self-employed",
+      "route": "/products",
+      "width": 768,
+      "document": 768,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "self-employed",
+      "route": "/profile",
+      "width": 768,
+      "document": 768,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "self-employed",
+      "route": "/products",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "self-employed",
+      "route": "/profile",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "student",
+      "route": "/products",
+      "width": 390,
+      "document": 390,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "student",
+      "route": "/profile",
+      "width": 390,
+      "document": 390,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "student",
+      "route": "/products",
+      "width": 768,
+      "document": 768,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "student",
+      "route": "/profile",
+      "width": 768,
+      "document": 768,
+      "h1": "Customer Profile"
+    },
+    {
+      "role": "student",
+      "route": "/products",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Find a loan that fits your life."
+    },
+    {
+      "role": "student",
+      "route": "/profile",
+      "width": 1440,
+      "document": 1440,
+      "h1": "Customer Profile"
+    }
+  ],
+  "runtimeErrors": [],
+  "failures": []
+}

@@ -39,3 +39,11 @@ Owner: S2. Every row names the code that enforces the rule and the test that pro
 - **Advisor memory.** Conversation facts are scoped by authenticated username and capped at 500 entries; restart loses them, and there is no multi-instance persistence.
 - **Demo state.** The live governance run retired 2026.4 and scheduled 2026.5 for 2026-11-22; 2026.3 currently remains active. Use new version numbers to repeat the upload demo.
 - **Runtime scope.** Real-provider advisor/policy services, policy governance HTTP, workflow HTTP and persisted audit checks passed; their observed outputs are in `docs/TEST_PROMPTS.md`. Clean-machine Docker startup, login-based full-stack integration, and a remote PR were not verified (S1 services and git remote are missing).
+
+## Full-stack integration update — 2026-10-23
+
+S1 is now merged. `ai/coreBridge.ts` uses real S1 application/product/customer services and loanMath; the stub is retained only for isolated tests. `testing/fullStack.test.ts` proves the persisted lifecycle and concurrent human-decision protection. The customer status page gets only the validated `{customerMessage, missingDocuments}` projection through its owned application; internal recommendations/audits remain staff-only.
+
+The real-browser full flow, live advisor, off-topic refusal, policy draft/preview/test-ask/publish/retire, all six logins, production build, and 57 responsive route checks passed. Evidence is in `docs/evidence/`. Both package audits report zero findings after patched compatible SDK dependencies, csv-parse 7.0.3 and Vitest 4.1.12; Prisma CLI/client are aligned at 6.12.0. Existing earlier mentions of pending S1 integration describe the pre-merge phase, not the current app.
+
+Still intentional: bureau, KYC and income verification are synthetic mocks; hosted AI requires network and configured keys. This session did not recreate Docker on a clean machine, run a comprehensive screen-reader audit, or deploy the app externally.

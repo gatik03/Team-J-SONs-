@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@fontsource-variable/inter';
 import './styles/tokens.css';
+import './styles/app.css';
 import { USE_MOCKS, ApiError } from './api/client';
 import { AuthProvider } from './auth/AuthContext';
 import { router } from './routes/router';
@@ -16,6 +17,8 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+try { document.documentElement.dataset.theme = localStorage.getItem('ll-theme') ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch { /* Use the default light palette. */ }
 
 async function start() {
   if (USE_MOCKS) {

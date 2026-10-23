@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../../common/auth';
 import { AppError, asyncHandler } from '../../common/errors';
 import { prisma } from '../../common/prisma';
+import { Prisma } from '@prisma/client';
+import { z } from 'zod';
 import {
   LoanApplicationDraftSchema,
   DecisionSchema,
@@ -76,7 +78,12 @@ applicationRouter.get(
       throw new AppError(403, 'FORBIDDEN', 'You do not own this application');
     }
 
-    res.json(applicationService.toLoanApplication(row));
+    const dto = applicationService.toLoanApplication(row);
+    if (user.role === 'CUSTOMER') {
+      const run = await prisma.agentRun.findFirst({ where: { applicationId, recommendation: { not: Prisma.AnyNull } }, orderBy: { startedAt: 'desc' }, select: { recommendation: true } });
+      const update = z.object({ customerMessage: z.string(), missingDocuments: z.array(z.string()) }).safeParse(run?.recommendation);
+      res.json({ ...dto, customerUpdate: update.success ? update.data : null });
+    } else res.json(dto);
   })
 );
 

@@ -68,7 +68,7 @@ export function AgentChecksTable({ rec }: AgentChecksTableProps) {
       )}
 
       {rec.customerMessage && (
-        <div className="p-3.5 bg-surface-2 border-l-4 border-accent rounded-r-md">
+        <div className="p-3.5 bg-surface-2 rounded-md">
           <span className="text-xs font-semibold text-muted block mb-1">
             Drafted Customer Message (AI Generated)
           </span>

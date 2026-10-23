@@ -14,7 +14,7 @@ export function SourceChip({ source, className = '' }: SourceChipProps) {
   return (
     <span
       title={fullTitle}
-      className={`inline-flex items-center gap-1.5 px-2 py-1 bg-accent-soft text-accent text-xs rounded-sm font-medium border border-accent/20 max-w-full ${className}`}
+      className={`inline-flex flex-wrap items-center gap-1.5 px-2 py-1 bg-accent-soft text-warn text-xs rounded-sm font-medium border border-accent/20 max-w-full ${className}`}
     >
       <span className="truncate">
         {source.document} · {source.section}

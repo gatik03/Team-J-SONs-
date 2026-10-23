@@ -55,7 +55,7 @@ export const COLUMNS: {
 export function EmiTable({ schedule }: EmiTableProps) {
   const downloadCsv = () => {
     const headers = COLUMNS.map((c) => c.label);
-    const rows = schedule.map((row, i) =>
+    const rows = schedule.map((row) =>
       COLUMNS.map((c) => {
         if (c.key === 'month') return row.month;
         if (c.key === 'openingBalance') return row.openingBalance;

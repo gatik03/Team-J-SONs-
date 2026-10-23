@@ -14,6 +14,7 @@ import { ErrorAlert } from '../ui/ErrorAlert';
 import { DOCUMENT_TYPE_LABEL } from '../knowledge/KnowledgeTable';
 import { UploadCloud, FileCheck } from 'lucide-react';
 import { ApiError } from '../../api/client';
+import { todayIso } from '../../lib/formatDate';
 
 export interface PolicyUploadFormProps {
   library: PolicyLibraryItem[];
@@ -33,7 +34,7 @@ export function PolicyUploadForm({
   const [documentKey, setDocumentKey] = useState(defaultDocumentKey);
   const [title, setTitle] = useState('');
   const [version, setVersion] = useState('2026.4');
-  const [effectiveDate, setEffectiveDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [effectiveDate, setEffectiveDate] = useState(todayIso);
   const [loanType, setLoanType] = useState<LoanTypeOrAll>('ALL');
   const [documentType, setDocumentType] = useState<KnowledgeDocumentType>('TERMS_AND_CONDITIONS');
   const [audience, setAudience] = useState<Audience>('CUSTOMER');
@@ -289,9 +290,13 @@ export function PolicyUploadForm({
         <label className="block text-sm font-medium text-fg">
           Policy file document <span className="text-danger">*</span>
         </label>
-        <div
+        <button
+          type="button"
+          aria-label="Choose policy document file"
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-border hover:border-primary/50 hover:bg-surface-2 rounded-lg p-5 text-center cursor-pointer transition-colors"
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={(event) => { event.preventDefault(); handleFileChange(event.dataTransfer.files); }}
+          className="w-full border-2 border-dashed border-border hover:border-primary/50 hover:bg-surface-2 rounded-lg p-5 text-center cursor-pointer transition-colors focus-ring"
         >
           {selectedFile ? (
             <div className="flex items-center justify-center gap-2 text-success">
@@ -310,7 +315,7 @@ export function PolicyUploadForm({
               <p className="text-[11px]">Supported formats: .pdf, .md, .csv, .json (Max 5 MB)</p>
             </div>
           )}
-        </div>
+        </button>
         {fieldErrors.file && <p className="text-xs text-danger font-medium">{fieldErrors.file}</p>}
         <input
           ref={fileInputRef}

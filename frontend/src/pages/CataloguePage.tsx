@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { ShieldCheck, ArrowUpRight } from 'lucide-react';
 import { useProducts } from '../api/hooks/products';
 import type { CustomerSegment, LoanType, ProductQuery, ProductSort } from '../api/types';
 import { CatalogueFilters } from '../components/products/CatalogueFilters';
@@ -66,9 +67,9 @@ export function CataloguePage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-h1 font-bold text-fg">Loan products</h1>
+          <h1 className="text-h1 font-bold text-fg">Find a loan that fits your life.</h1>
           <p className="text-sm text-muted">
-            Explore Kestrel Bank's retail lending options tailored for your needs.
+            Explore your options, understand the numbers, and take your next step with confidence.
           </p>
         </div>
 
@@ -88,6 +89,8 @@ export function CataloguePage() {
         )}
       </div>
 
+      <section className="catalogue-banner"><div><h2>Your ambitions.<br/>Our expertise.</h2><p>From everyday plans to life’s biggest milestones,<br/>there’s a lending option worth exploring.</p><Link className="text-link" to="/advisor">Find my fit with the loan advisor <ArrowUpRight size={18}/></Link></div><div className="banner-aside"><ShieldCheck size={34}/><strong>Clarity at every step</strong><span>Transparent terms<br/>Personal guidance<br/>Always a human decision</span></div></section>
+      <div className="section-heading"><h2>Explore our loans</h2><span>{products?.length ?? '…'} options for your next move</span></div>
       <CatalogueFilters
         q={q}
         loanType={loanType}

@@ -9,6 +9,7 @@ import { API_BASE } from '../api/client';
 import { applications } from '../mocks/fixtures';
 import { AuthContext, type AuthValue } from '../auth/AuthContext';
 import { ApplicationWizardPage } from './ApplicationWizardPage';
+import type { LoanApplicationDraft } from '../api/types';
 
 function setupWizardTest(initialPath: string) {
   const queryClient = new QueryClient({
@@ -54,12 +55,12 @@ describe('ApplicationWizard', () => {
   });
 
   it('saves draft on click and sends updated step to API', async () => {
-    let captured: { id: unknown; body: any } | null = null;
+    let captured: { id: unknown; body: LoanApplicationDraft } | null = null;
     const fixtureDraft = applications.find((a) => a.applicationId === 'LA-2026-00420')!;
 
     server.use(
       http.put(`${API_BASE}/api/applications/:id`, async ({ request, params }) => {
-        captured = { id: params.id, body: await request.json() };
+        captured = { id: params.id, body: await request.json() as LoanApplicationDraft };
         return HttpResponse.json({ ...fixtureDraft, ...captured.body });
       })
     );
@@ -78,5 +79,16 @@ describe('ApplicationWizard', () => {
       expect(captured?.id).toBe('LA-2026-00420');
       expect(captured?.body.currentStep).toBe(2);
     });
+  });
+
+  it('shows a failed draft save without advancing or losing the entered fields', async () => {
+    server.use(http.put(`${API_BASE}/api/applications/:id`, () => HttpResponse.json({status:503,code:'INTERNAL',message:'Saving is temporarily unavailable. Try again.',timestamp:new Date().toISOString()},{status:503})));
+    setupWizardTest('/applications/LA-2026-00420/edit');
+    const employment=await screen.findByLabelText(/Employment type/i);
+    await userEvent.setup().clear(employment);
+    await userEvent.setup().type(employment,'Retail consultant');
+    await userEvent.setup().click(screen.getByRole('button',{name:/^Save draft$/i}));
+    expect(await screen.findByText('Saving is temporarily unavailable. Try again.')).toBeInTheDocument();
+    expect(employment).toHaveValue('Retail consultant');
   });
 });

@@ -9,8 +9,10 @@ describe('formatInr and formatPercent', () => {
     expect(formatInr(0)).toBe('₹0');
   });
 
-  it('formats percentages with one decimal place', () => {
+  it('preserves quarter-percent rates and fees without rounding the policy figure', () => {
     expect(formatPercent(11)).toBe('11.0%');
     expect(formatPercent(10.5)).toBe('10.5%');
+    expect(formatPercent(9.25)).toBe('9.25%');
+    expect(formatPercent(0.75)).toBe('0.75%');
   });
 });

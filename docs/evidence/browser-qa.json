@@ -1,0 +1,37 @@
+{
+  "passed": [
+    "Customer sees eight live loan products",
+    "Vehicle filter returns two real products",
+    "Two products compare through the live endpoint",
+    "EMI API returns ₹10,871 for 5 lakh at 11% over 60 months",
+    "Draft reload resumes at employment step",
+    "Customer creates, reloads, uploads identity/income and submits without address proof",
+    "Customer cannot open officer queue",
+    "Officer workflow reads the real newly submitted application and flags missing address proof",
+    "Officer has no approval control",
+    "Analyst can review persisted recommendation and audit",
+    "Policy Admin lands in the live versioned policy library",
+    "Policy Admin cannot open customer products",
+    "Customer sees the safe persisted update without staff recommendation endpoint access",
+    "390px mobile catalogue has no horizontal overflow",
+    "Mobile navigation opens and closes on route selection",
+    "No uncaught browser runtime errors"
+  ],
+  "errors": [],
+  "apiErrors": [
+    {
+      "url": "workflow/applications/LA-2026-28805/recommendation",
+      "status": 404
+    }
+  ],
+  "screens": [
+    "emi-desktop",
+    "customer-status-desktop",
+    "officer-review-desktop",
+    "analyst-review-desktop",
+    "policy-library-desktop",
+    "catalogue-mobile-final",
+    "catalogue-mobile-dark"
+  ],
+  "applicationId": "LA-2026-28805"
+}

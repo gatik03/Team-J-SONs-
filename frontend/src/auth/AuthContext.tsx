@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
   const login = (res: LoginResponse, username: string) => {
+    queryClient.clear();
     const authUser: AuthUser = {
       username,
       role: res.role,

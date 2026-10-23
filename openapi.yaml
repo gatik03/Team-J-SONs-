@@ -720,6 +720,15 @@ components:
             createdAt: { type: string, format: date-time }
             updatedAt: { type: string, format: date-time }
             estimatedEmi: { type: integer, nullable: true }
+            customerUpdate:
+              type: object
+              nullable: true
+              description: Customer-safe workflow update; excludes checks, scores, risk band and audit data.
+              properties:
+                customerMessage: { type: string }
+                missingDocuments:
+                  type: array
+                  items: { type: string }
             timeline:
               type: array
               items:

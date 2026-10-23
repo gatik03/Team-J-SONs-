@@ -254,10 +254,11 @@ export async function transition(
   assertTransition(app.status, to);
 
   const updated = await prisma.$transaction(async (tx) => {
-    await tx.loanApplication.update({
-      where: { applicationId },
+    const changed = await tx.loanApplication.updateMany({
+      where: { applicationId, status: app.status },
       data: { status: to },
     });
+    if (changed.count !== 1) throw new AppError(409, 'INVALID_STATE', 'Application status changed during this action. Refresh and try again.');
 
     await tx.statusEvent.create({
       data: {

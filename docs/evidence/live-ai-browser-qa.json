@@ -1,0 +1,13 @@
+{
+  "passed": [
+    "Live advisor returns expected ₹10,871 EMI through the browser",
+    "Off-topic policy question is safely refused through live retrieval",
+    "Policy admin uploads a real embedded draft via UI",
+    "Admin test-ask searches the uploaded draft with real providers",
+    "Publish confirmation activates the draft",
+    "Retirement confirmation records a reason and restores previous policy",
+    "Live AI and governance screens have no uncaught browser errors"
+  ],
+  "errors": [],
+  "version": "QA-1792751417351"
+}

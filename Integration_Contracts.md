@@ -172,3 +172,7 @@ S3 uses MSW handlers in `frontend/src/mocks/handlers.ts` that return the `exampl
 ## 10. Shared files — change protocol
 
 `openapi.yaml`, `Integration_Contracts.md`, `docker-compose.yml`, `.env.example`, `backend/package.json`, `backend/prisma/schema.prisma`, `frontend/package.json`: change only in a PR titled `contract: <what>`; post the PR link in the team chat; other sessions pull `main` before touching dependent code.
+
+## Integrated customer workflow updates
+
+`GET /api/applications/:applicationId` now returns an optional nullable `customerUpdate: { customerMessage, missingDocuments }` for the owning CUSTOMER. It projects only those two validated fields from the most recent persisted workflow result. Scores, agent checks, risk bands and audit details remain behind staff-only workflow/audit endpoints. The status page uses this projection and can upload missing documents without calling the staff recommendation endpoint. Concurrent status/credit decisions use a compare-and-update transaction; a stale action returns 409 and cannot overwrite a completed decision.

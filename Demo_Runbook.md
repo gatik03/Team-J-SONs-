@@ -1,3 +1,17 @@
+## Integrated rehearsal — verified 2026-10-23
+
+Use `README.md` startup commands. Open localhost:5173 for development or localhost:8080 after building the frontend. Live mode has no MOCK DATA badge.
+
+1. Sign in as Priya from the demo button. Filter loans to Vehicle, compare two products, and calculate ₹5,00,000 at 11% for 60 months (EMI ₹10,871).
+2. Ask the advisor the brief's used-car question. Ask the policy assistant a supported policy question and an off-topic question; show the source/version or safe refusal.
+3. Start a personal-loan application, save, reload to resume, upload identity and income only, then submit. The address proof remains missing.
+4. Sign out, sign in as Arjun Kumar. Find the new application in the queue, run AI pre-screen, show the missing-address check, persisted audit, and human-required message. Officer has no final decision control.
+5. Sign in as Neha Mehta to inspect the same recommendation and record a reasoned human credit decision. Customers see only their safe next-step message.
+6. Sign in as Policy Admin. Upload a fresh VEHICLE-TNC version (use a new version string), preview/test-ask the draft, publish with confirmation, then retire with a reason to demonstrate rollback.
+7. Show the responsive mobile drawer and theme toggle; open the customer-only/staff-only routes with the wrong role to demonstrate the guard.
+
+Actual browser logs and screenshots: `docs/evidence/`. The original walkthrough below is retained as reference; current implementation paths are in `Component_Change_Manual.md`.
+
 # Demo Runbook — LoanLens AI (8 minutes)
 
 Shared file (PR only). Owner for phase 3: S3. **Status 2026-10-23: no code exists; commands and screens are the planned ones from `Team_Work_Split.md` / `openapi.yaml`. Rehearse end to end twice once all three streams are merged, then fix this file to what actually happened.**

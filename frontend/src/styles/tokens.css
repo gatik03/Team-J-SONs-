@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+/* Dark mode = data-theme="dark" on <html> (Design.md §2). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* brand */
+  --color-primary: #0D5E61;        /* deep teal: buttons, links, active nav */
+  --color-primary-hover: #0A4C4E;
+  --color-primary-soft: #E2F1F0;   /* tinted backgrounds, selected rows */
+  --color-accent: #D97706;         /* amber: AI tag, source chips, focus ring */
+  --color-accent-soft: #FEF3C7;
+
+  /* semantic */
+  --color-success: #15803D;
+  --color-success-soft: #DCFCE7;
+  --color-warn: #B45309;
+  --color-warn-soft: #FEF3C7;
+  --color-danger: #B91C1C;
+  --color-danger-soft: #FEE2E2;
+  --color-info: #1D4ED8;
+  --color-info-soft: #DBEAFE;
+
+  /* neutrals */
+  --color-n0: #FFFFFF;
+  --color-n50: #F8FAFA;
+  --color-n100: #F1F5F5;
+  --color-n200: #E2E8E8;
+  --color-n300: #CBD5D5;
+  --color-n400: #94A3A3;
+  --color-n500: #647474;
+  --color-n600: #475555;
+  --color-n700: #334141;
+  --color-n800: #1E2929;
+  --color-n900: #0F1717;
+
+  /* roles: bg-bg, bg-surface, bg-surface-2, border-border, text-fg, text-muted */
+  --color-bg: #F8FAFA;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F1F5F5;
+  --color-border: #E2E8E8;
+  --color-fg: #0F1717;
+  --color-muted: #647474;
+
+  /* type scale: text-display, text-h1, text-h2, text-h3, text-body (text-sm / text-xs are Tailwind defaults) */
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.15;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 1.2;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.25;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.3;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+
+  /* radius: rounded-sm (inputs, chips), rounded-md (buttons, cards), rounded-lg (modals, chat), rounded-full (badges) */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* shadow */
+  --shadow-card: 0 1px 2px rgb(15 23 23 / 0.06), 0 1px 3px rgb(15 23 23 / 0.10);
+  --shadow-pop: 0 8px 24px rgb(15 23 23 / 0.14);
+}
+
+:root[data-theme="dark"] {
+  --color-primary: #38B2AC;
+  --color-primary-hover: #5EC8C2;
+  --color-primary-soft: #133637;
+  --color-accent: #FBBF24;
+  --color-accent-soft: #452E0A;
+  --color-success: #4ADE80;
+  --color-success-soft: #0C321C;
+  --color-warn: #FBBF24;
+  --color-warn-soft: #452E0A;
+  --color-danger: #F87171;
+  --color-danger-soft: #451414;
+  --color-info: #60A5FA;
+  --color-info-soft: #172554;
+  --color-bg: #0F1717;
+  --color-surface: #1E2929;
+  --color-surface-2: #334141;
+  --color-border: #334141;
+  --color-fg: #F8FAFA;
+  --color-muted: #94A3A3;
+  --shadow-card: none;
+  --shadow-pop: none;
+  color-scheme: dark;
+}
+
+/* Shared focus ring (Design.md §8): add class "focus-ring" to every interactive element. */
+@utility focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-fg font-sans text-body antialiased;
+  }
+}

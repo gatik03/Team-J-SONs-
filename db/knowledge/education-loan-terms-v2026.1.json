@@ -1,0 +1,8 @@
+{
+  "Eligibility": { "applicant": "Indian student admitted to a recognised course in India or abroad", "coApplicant": "Parent or guardian is mandatory", "coApplicantMinCreditScore": 650 },
+  "Interest Rate and Tenure": { "EL-401 India": "10.5% to 12.5% per annum, tenure 12 to 120 months, amount ₹50,000 to ₹20,00,000", "EL-402 Abroad": "11.5% to 13.5% per annum, tenure 12 to 180 months, amount ₹5,00,000 to ₹75,00,000" },
+  "Moratorium": "Course duration plus 12 months; simple interest is charged during the moratorium.",
+  "Collateral": "No collateral up to ₹7,50,000; tangible collateral required above ₹7,50,000.",
+  "Processing Fee": "1.0% of the loan amount, minimum ₹1,000; waived for loans up to ₹4,00,000.",
+  "Foreclosure and Part-Prepayment": "Allowed at any time with no charge."
+}

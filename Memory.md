@@ -1,3 +1,12 @@
+## 2026-10-23 — Full-stack integration and S3 completion
+
+- Fetched every remote branch, including the newly pushed `feat/s3-wip`; merged S1, S2 and S3 into `feat/full-stack-integration`, preserving shared backend files when resolving S3's unrelated history.
+- Real coreBridge now calls S1 services; integrated tests prove draft→submission→workflow→human credit decision against Postgres. Concurrent final decisions cannot overwrite each other.
+- Built and polished the full S3 frontend: teal sidebar, sign-in, six demo users, catalogue/compare/calculator, AI chats, profile, save/resume/uploads/status, officer/analyst queue and audits, policy governance.
+- Live mode is on, Vite proxies same-origin API requests, and Express serves the production frontend with nested-route fallback.
+- Evidence: `docs/evidence/browser-qa.json`, `live-ai-browser-qa.json`, `responsive-qa.json`, `production-smoke.json`. Live advisor and draft/publish/retire flows passed. 57 route/viewport checks across six users and 390/768/1440px passed with no overflow/runtime errors. Both npm audits report zero findings.
+- Synthetic mock bureau/income/KYC remain intentional. Provider calls require configured keys; `.env` remains ignored. Clean-machine Docker creation was not rerun on this already-configured database.
+
 # Memory.md — live progress log
 
 Shared file. Append at every milestone; newest entry on top of each section. Keep it factual: only things actually run/verified go under "Working commands".

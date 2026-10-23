@@ -1,5 +1,7 @@
 import express, { Express } from 'express';
 import cors from 'cors';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { aiRouter } from './ai/index';
 import { authRouter } from './core/auth/router';
 import { productRouter } from './core/product/router';
@@ -23,6 +25,12 @@ export function createApp(): Express {
 
   // AI router (owned by S2)
   app.use('/api', aiRouter);
+
+  const frontend = fileURLToPath(new URL('../../frontend/dist/', import.meta.url));
+  if (existsSync(frontend + 'index.html')) {
+    app.use(express.static(frontend));
+    app.get('*', (req, res, next) => req.path === '/api' || req.path.startsWith('/api/') ? next() : res.sendFile(frontend + 'index.html'));
+  }
 
   // Errors always last
   app.use(notFound);

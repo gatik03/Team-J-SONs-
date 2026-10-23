@@ -20,6 +20,7 @@ export interface PolicyUploadFormProps {
   library: PolicyLibraryItem[];
   defaultDocumentKey?: string;
   onCreated: (v: PolicyVersion) => void;
+  onCancel: () => void;
 }
 
 const DOCUMENT_KEY_PATTERN = /^[A-Z0-9]+(-[A-Z0-9]+)*$/;
@@ -30,6 +31,7 @@ export function PolicyUploadForm({
   library,
   defaultDocumentKey = '',
   onCreated,
+  onCancel,
 }: PolicyUploadFormProps) {
   const [documentKey, setDocumentKey] = useState(defaultDocumentKey);
   const [title, setTitle] = useState('');
@@ -327,7 +329,10 @@ export function PolicyUploadForm({
         />
       </div>
 
-      <div className="pt-3 border-t border-border flex justify-end">
+      <div className="pt-3 border-t border-border flex flex-wrap justify-end gap-3">
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={uploadMutation.isPending}>
+          Cancel
+        </Button>
         <Button
           type="submit"
           loading={uploadMutation.isPending}

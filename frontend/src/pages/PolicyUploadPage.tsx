@@ -51,6 +51,7 @@ export function PolicyUploadPage() {
             library={library ?? []}
             defaultDocumentKey={defaultDocumentKey}
             onCreated={handleCreated}
+            onCancel={() => navigate('/admin/policies')}
           />
         )}
       </Card>

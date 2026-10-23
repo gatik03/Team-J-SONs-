@@ -1,0 +1,9 @@
+section,product_id,product_name,loan_type,interest_rate_range,indicative_rate,tenure_months,amount_range,processing_fee,foreclosure_charge
+Personal Loans,PL-101,Kestrel Personal Loan – Salaried,PERSONAL,11.5% to 18.0%,12.0%,12 to 60,"₹50,000 to ₹25,00,000","1.5% (min ₹2,500, max ₹10,000) + GST",3% of outstanding principal after 12 EMIs
+Personal Loans,PL-102,Kestrel Personal Loan – Self-Employed,PERSONAL,13.0% to 20.0%,14.0%,12 to 48,"₹1,00,000 to ₹15,00,000","2.0% (min ₹3,000, max ₹15,000) + GST",3% of outstanding principal after 12 EMIs
+Home Loans,HL-301,Kestrel Home Loan,HOME,8.5% to 10.5%,8.75%,60 to 360,"₹5,00,000 to ₹5,00,00,000","0.5% (min ₹5,000, max ₹25,000) + GST",Nil on floating rate; 2% within 3 years on fixed rate
+Home Loans,HL-302,Kestrel Home Top-Up Loan,HOME,9.25% to 11.5%,9.5%,12 to 180,"₹1,00,000 to ₹50,00,000","0.5% (min ₹3,000, max ₹15,000) + GST",Nil on floating rate; 2% within 3 years on fixed rate
+Vehicle Loans,VL-201,Kestrel New Car Loan,VEHICLE,9.25% to 12.0%,9.25%,12 to 84,"₹1,00,000 to ₹50,00,000","1.5% (min ₹1,000, max ₹7,500) + GST",2% of outstanding principal after 6 EMIs
+Vehicle Loans,VL-204,Kestrel Pre-Owned Car Loan,VEHICLE,11.0% to 14.0%,11.0%,12 to 84,"₹1,00,000 to ₹25,00,000","1.5% (min ₹1,000, max ₹7,500) + GST",2% of outstanding principal after 6 EMIs
+Education Loans,EL-401,Kestrel Education Loan – India,EDUCATION,10.5% to 12.5%,10.5%,12 to 120,"₹50,000 to ₹20,00,000","1.0% (min ₹1,000, max ₹10,000) + GST",Nil
+Education Loans,EL-402,Kestrel Education Loan – Abroad,EDUCATION,11.5% to 13.5%,11.5%,12 to 180,"₹5,00,000 to ₹75,00,000","1.0% (min ₹5,000, max ₹20,000) + GST",Nil

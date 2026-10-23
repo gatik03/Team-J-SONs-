@@ -14,3 +14,5 @@ backend/.mvn/wrapper/*.jar
 frontend/.vite/
 backend/.cache/
 backend/uploads/
+
+docker-compose.override.yml

@@ -73,7 +73,7 @@ model Customer {
   location                   String
   kycStatus                  KycStatus         @map("kyc_status")
   dateOfBirth                DateTime          @map("date_of_birth") @db.Date
-  /// Fake PAN/Aadhaar text, internal only, never returned by the API. Exists so S2 can demonstrate PII masking in prompts/logs (M2-8).
+  /// Fake PAN/Aadhaar text, internal only, never returned by the API. Exists so S2 can demonstrate PII masking in docs/prompts/logs (M2-8).
   kycRef                     String?           @map("kyc_ref")
   user                       AppUser?
   applications               LoanApplication[]
@@ -166,3 +166,124 @@ model ApplicationDocument {
 // For reference only (S1 adds none of this): S2's KbDocument is one row per policy VERSION with documentKey,
 // status (DRAFT|PUBLISHED|RETIRED), changeNote, createdBy, publishedBy, publishedAt, retiredAt, retiredReason,
 // @@unique([documentKey, version]) and no isLatest flag (Integration_Contracts §8a).
+
+enum KbLoanType {
+  PERSONAL
+  HOME
+  VEHICLE
+  EDUCATION
+  ALL
+}
+
+enum KbDocumentType {
+  TERMS_AND_CONDITIONS
+  RATE_FEE_SCHEDULE
+  CREDIT_POLICY
+  KYC_CHECKLIST
+  PREPAYMENT_POLICY
+  GRIEVANCE
+  REGULATORY_CIRCULAR
+  OFFICER_PLAYBOOK
+}
+
+enum KbAudience {
+  CUSTOMER
+  INTERNAL
+}
+
+enum KbCustomerSegment {
+  SALARIED
+  SELF_EMPLOYED
+  STUDENT
+  ALL
+}
+
+enum PolicyStatus {
+  DRAFT
+  PUBLISHED
+  RETIRED
+}
+
+enum AuditEventType {
+  AGENT_START
+  TOOL_CALL
+  TOOL_RESULT
+  LLM_CALL
+  LLM_RESULT
+  PERMISSION_DENIED
+  AGENT_END
+  HUMAN_REQUIRED
+  POLICY_DRAFTED
+  POLICY_PUBLISHED
+  POLICY_RETIRED
+}
+
+// One row = one immutable policy VERSION. Versions of one policy share documentKey (Integration_Contracts §8a).
+model KbDocument {
+  id              String            @id @default(uuid())
+  documentKey     String            @map("document_key") // e.g. VEHICLE-TNC; stable across versions
+  title           String
+  version         String
+  effectiveDate   DateTime          @map("effective_date") @db.Date
+  loanType        KbLoanType        @map("loan_type")
+  documentType    KbDocumentType    @map("document_type")
+  audience        KbAudience
+  customerSegment KbCustomerSegment @default(ALL) @map("customer_segment")
+  status          PolicyStatus      @default(DRAFT)
+  changeNote      String            @map("change_note")
+  createdBy       String            @map("created_by") // username, or "system" for npm run ingest
+  publishedBy     String?           @map("published_by")
+  publishedAt     DateTime?         @map("published_at")
+  retiredAt       DateTime?         @map("retired_at")
+  retiredReason   String?           @map("retired_reason")
+  sourceFile      String            @map("source_file")
+  ingestedAt      DateTime          @default(now()) @map("ingested_at")
+  chunks          KbChunk[]
+
+  @@unique([documentKey, version])
+  @@index([documentKey, status, effectiveDate])
+  @@map("kb_document")
+}
+
+model KbChunk {
+  id         String                     @id @default(uuid())
+  documentId String                     @map("document_id")
+  document   KbDocument                 @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  ordinal    Int                        @default(0) // chunk order inside the document (admin preview)
+  section    String
+  content    String
+  metadata   Json                       @default("{}")
+  embedding  Unsupported("vector(768)")
+
+  @@index([documentId])
+  @@map("kb_chunk")
+}
+
+model AgentRun {
+  auditTrailId   String       @id @map("audit_trail_id")
+  applicationId  String       @map("application_id") // plain string: no FK into S1's table (we may not edit S1's model); holds the documentKey for AUD-POL-* policy trails
+  startedAt      DateTime     @default(now()) @map("started_at")
+  completedAt    DateTime?    @map("completed_at")
+  recommendation Json?
+  events         AuditEvent[]
+
+  @@index([applicationId, startedAt])
+  @@map("agent_run")
+}
+
+model AuditEvent {
+  id           String         @id @default(uuid())
+  auditTrailId String         @map("audit_trail_id")
+  run          AgentRun       @relation(fields: [auditTrailId], references: [auditTrailId], onDelete: Cascade)
+  sequence     Int
+  timestamp    DateTime       @default(now())
+  agent        String // agent name, or the admin's username for POLICY_* events
+  eventType    AuditEventType @map("event_type")
+  toolName     String?        @map("tool_name")
+  input        Json           @map("input_json")
+  output       Json           @map("output_json")
+  durationMs   Int            @default(0) @map("duration_ms")
+
+  @@unique([auditTrailId, sequence])
+  @@map("audit_event")
+}

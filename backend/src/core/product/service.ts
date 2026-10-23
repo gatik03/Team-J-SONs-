@@ -8,6 +8,13 @@ import type {
   EligibilityCriteriaDto,
 } from './schemas';
 
+export type {
+  ProductQueryInput,
+  LoanProductDto,
+  LoanProductRecord,
+  EligibilityCriteriaDto,
+};
+
 export function toLoanProduct(row: LoanProduct): LoanProductDto {
   return {
     productId: row.productId,

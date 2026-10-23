@@ -18,6 +18,15 @@ import type {
   ApplicationListQueryInput,
 } from './schemas';
 
+export type {
+  LoanApplicationDto,
+  LoanApplicationWithDocs,
+  ApplicationDocumentDto,
+  StatusEventDto,
+  LoanApplicationDraftInput,
+  ApplicationListQueryInput,
+};
+
 export function toStatusEvent(e: StatusEvent): StatusEventDto {
   return {
     status: e.status,

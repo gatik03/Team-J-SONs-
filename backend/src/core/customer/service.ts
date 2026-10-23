@@ -7,6 +7,12 @@ import type {
   CustomerProfileUpdateInput,
 } from './schemas';
 
+export type {
+  CustomerProfileDto,
+  CustomerRecord,
+  CustomerProfileUpdateInput,
+};
+
 export function toCustomerProfile(row: Customer): CustomerProfileDto {
   const dob = row.dateOfBirth.toISOString().split('T')[0];
   return {

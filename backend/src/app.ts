@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import { aiRouter } from './ai/index';
+import { authRouter } from './core/auth/router';
 import { emiRouter } from './core/emi/router';
 import { notFound, errorHandler } from './common/errors';
 
@@ -11,6 +12,7 @@ export function createApp(): Express {
   app.use(express.json({ limit: '1mb' }));
 
   // Core routers
+  app.use('/api/auth', authRouter);
   app.use('/api/emi', emiRouter);
 
   // AI router (owned by S2)

@@ -1,30 +1,43 @@
-# Team-J-SONs- — LoanLens AI (Kestrel Bank)
-> HCLTech Hackathon
+# LoanLens AI · Kestrel Bank
 
-LoanLens AI: AI loan advisor, RAG policy assistant and agentic loan pre-processing with human-in-the-loop.
-Stack: React 19 + Vite + Tailwind · Node 22 + Express + TypeScript + Prisma + Zod · Vercel AI SDK · PostgreSQL + pgvector · LLM via NVIDIA NIM / Gemini (OpenAI-compatible) · Gemini embeddings.
-Why not Spring AI? See `Preliminary_Design.md` §"Why we changed the architecture" and `Decisions.md` ADR-0.
+HCLTech hackathon submission: loan discovery and applications, a grounded policy assistant, and auditable loan pre-screening with a human credit analyst making the final decision. All banking data is synthetic.
 
-## Start here
+**Stack:** React 19 · Vite · Tailwind · Node.js 22 · Express · TypeScript · Prisma · PostgreSQL 16 + pgvector · Gemini chat and embeddings.
 
-| Read | Why |
+## Screenshots
+
+### Loan discovery
+
+![Loan catalogue with search, filters and product comparison](docs/evidence/catalogue-desktop.png)
+
+| AI loan advisor | Policy administration |
 |---|---|
-| `Getting_Started.md` | What to do now: set up your device, clone, branch, start your session |
-| `prompts/S1_backend_core.md`, `S2_backend_ai.md`, `S3_frontend.md` | Paste the one for your stream into Antigravity (Gemini) |
-| `Preliminary_Design.md` | Judge-facing explanation of the design and how we built it |
-| `docs/USECASE.md` | The brief — source of truth |
-| `CLAUDE.md`, `REQUIREMENTS.md` | Project rules and the traceability checklist |
-| `Integration_Contracts.md`, `openapi.yaml` | What every layer agrees on |
-| `Team_Work_Split.md` | Who owns what, git workflow |
-| `Hackathon_Strategy.md`, `PRD.md` | Why and what |
-| `Architecture.md`, `Flow.md`, `Rules.md`, `Decisions.md`, `Phases.md` | How |
-| `Design.md`, `Component_Change_Manual.md` | Frontend look and live-change guide |
-| `Demo_Runbook.md`, `Submission_Checklist.md`, `Judge_QA_Playbook.md` | Demo day |
-| `Memory.md` | Live progress log — update at every milestone |
+| ![Advisor with calculated recommendations](docs/evidence/advisor-live.png) | ![Versioned policy library](docs/evidence/policy-library-desktop.png) |
 
-## Run the integrated app
+| Human analyst review | Mobile catalogue |
+|---|---|
+| ![Analyst recommendation and audit review](docs/evidence/analyst-review-desktop.png) | ![Responsive mobile catalogue](docs/evidence/catalogue-mobile-final.png) |
 
-Requires Node 22, PostgreSQL 16 with pgvector, and a Gemini key for embeddings. Keep your existing `.env`; for a fresh checkout copy `.env.example` and fill its keys. Use `VITE_USE_MOCKS=false` and leave `VITE_API_BASE_URL` empty for same-origin requests.
+Screenshots are recorded local checks; demo data/dates can differ on a new installation. More: [docs/evidence](docs/evidence).
+
+## Architecture
+
+![LoanLens architecture: React, Express, deterministic loan services, grounded AI, PostgreSQL and human approval](docs/architecture.svg)
+
+[PNG diagram](docs/architecture.png) · [SVG diagram](docs/architecture.svg) · [architecture](docs/ARCHITECTURE.md) · [solution overview](docs/SOLUTION_OVERVIEW.md)
+
+## Run on your device
+
+Install **Git, Node.js 22 and Docker Desktop/Compose**. Get a Gemini key at [Google AI Studio](https://aistudio.google.com/apikey); hosted AI requires internet and available quota.
+
+```bash
+git clone https://github.com/gatik03/Team-J-SONs-.git
+cd Team-J-SONs-
+```
+
+Open this folder in your editor. Copy `.env.example` to **`.env` in this top-level folder**, beside `docker-compose.yml`. Paste the same Gemini key into **both** `LL_AI_API_KEY` and `LL_EMBED_API_KEY`. Keep the other supplied settings. Never share `.env`.
+
+Terminal 1, from the project folder:
 
 ```bash
 docker compose up -d --wait
@@ -37,7 +50,7 @@ npm run ingest
 npm run dev
 ```
 
-In a second terminal:
+Terminal 2, from the project folder:
 
 ```bash
 cd frontend
@@ -45,15 +58,60 @@ npm ci
 npm run dev
 ```
 
-Open **http://localhost:5173**. The six demo users are shown on the sign-in screen; all use password `password`.
+Open **http://localhost:5173**. [Detailed setup and troubleshooting](docs/SETUP.md).
 
-For the built application, run `npm run build` in `frontend/`, then `npm start` in `backend/`. Express serves the built frontend and API together at **http://localhost:8080**, including page reloads on nested routes.
+## Demo logins
 
-```bash
-cd backend && npm test && npm run build
-cd ../frontend && npm test && npm run build
+Every demo password is **`password`**. Authentication is simulated for the hackathon.
+
+| Role | Username |
+|---|---|
+| Customer — salaried | `priya.sharma` |
+| Customer — self-employed | `rahul.verma` |
+| Customer — student | `ananya.iyer` |
+| Loan officer | `officer.kumar` |
+| Credit analyst | `analyst.mehta` |
+| Policy admin | `admin.rao` |
+
+## Submission guide
+
+| Deliverable | Read or run |
+|---|---|
+| Requirement checklist and verification | [SUBMISSION.md](docs/SUBMISSION.md) |
+| Overview and architecture | [SOLUTION_OVERVIEW.md](docs/SOLUTION_OVERVIEW.md), [ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Schema and migrations | [SCHEMA.md](docs/SCHEMA.md), [schema.prisma](backend/prisma/schema.prisma) |
+| Setup | [SETUP.md](docs/SETUP.md), [.env.example](.env.example) |
+| Live demonstration | [DEMO.md](docs/DEMO.md) |
+| Exact test prompts | [TEST_PROMPTS.md](docs/TEST_PROMPTS.md) |
+| AI guardrails and limitations | [GUARDRAILS.md](docs/GUARDRAILS.md) |
+| Synthetic seed scripts | [seed.ts](backend/prisma/seed.ts), [knowledge manifest](db/knowledge/manifest.json) |
+| API contract | [openapi.yaml](openapi.yaml) |
+
+## Source layout
+
+```text
+backend/
+  prisma/             # Schema, migrations and synthetic seed
+  src/core/           # Auth, customers, products, EMI, applications, uploads
+  src/ai/             # Advisor, RAG, governance, agents, tools and audit
+  src/common/         # Guards, errors, Prisma and logging
+frontend/src/
+  api/                # Typed HTTP client and query hooks
+  components/         # Reusable and feature-specific UI
+  pages/              # Customer, officer, analyst and admin screens
+  routes/             # Routing and role guards
+db/knowledge/         # Synthetic policies and ingestion manifest
+docs/                 # Submission docs, diagrams, screenshots and samples
+  archive/            # Historical planning docs; separate supporting ZIP
+scripts/              # Reproducible submission packaging
 ```
 
-Current verification: **103 backend tests and 14 frontend tests pass**, both builds pass, and both npm audits report zero findings. Real-browser evidence includes all six demo logins, the application/upload/workflow flow, live AI advisor and policy governance, and 57 route/viewport checks at 390, 768 and 1440px. See [HANDOFF.md](HANDOFF.md) and [docs/evidence](docs/evidence).
+## Verification and packaging
 
-The app uses synthetic data and requires live AI providers for advice, embeddings and policy generation. Credit bureau/income/KYC are documented mocks; every final credit decision is a human analyst action. See [docs/SETUP.md](docs/SETUP.md) for database details and [docs/GUARDRAILS.md](docs/GUARDRAILS.md) for AI limits.
+From `backend/`, run `npm test` and `npm run build`. From `frontend/`, run `npm test` and `npm run build`. Backend integration tests need the configured PostgreSQL database; automated tests mock provider calls. Recorded live-provider/browser evidence is in `docs/evidence/`.
+
+For a combined local server, build `frontend/`, then run `npm start` from `backend/`. Open **http://localhost:8080**; nested-route reloads are supported.
+
+To recreate the shareable ZIPs, run `python3 scripts/package_submission.py` (Windows: `py scripts/package_submission.py`). The source ZIP includes `.env.example` and excludes credentials, uploads, dependencies, Git history and historical planning docs. Supporting docs are packaged separately. See [SUBMISSION.md](docs/SUBMISSION.md).
+
+This is a local hackathon application. Bureau, income and KYC tools are synthetic; AI outages can still interrupt essential extraction/retrieval. See [GUARDRAILS.md](docs/GUARDRAILS.md).

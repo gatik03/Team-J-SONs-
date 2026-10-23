@@ -90,7 +90,7 @@ Every line below comes from the brief. Tick a box only when it works end to end,
 ## Deliverables
 
 - [x] D-1 Working application and source code → docker-compose.yml, backend/src/index.ts
-- [x] D-2 Architecture diagram and solution overview (`Architecture.md` + `Preliminary_Design.md`) → `Architecture.md`, `Preliminary_Design.md`; integrated S1/S2/S3 runtime described in `HANDOFF.md`
+- [x] D-2 Architecture diagram and solution overview (`docs/archive/Architecture.md` + `docs/archive/Preliminary_Design.md`) → `docs/archive/Architecture.md`, `docs/archive/Preliminary_Design.md`; integrated S1/S2/S3 runtime described in `docs/archive/HANDOFF.md`
 - [x] D-3 Setup instructions (`docs/SETUP.md`) → docs/SETUP.md
 - [x] D-4 Live demonstration of key capabilities (demo script) → live UI rehearsals: `docs/evidence/browser-qa.json`, `live-ai-browser-qa.json`, screenshots and `production-smoke.json`
 - [x] D-5 Proper schema design (`backend/prisma/schema.prisma` + migrations) → backend/prisma/schema.prisma, backend/prisma/migrations/20261023085735_init/migration.sql

@@ -18,3 +18,4 @@ backend/uploads/
 docker-compose.override.yml
 
 .playwright-mcp/
+artifacts/

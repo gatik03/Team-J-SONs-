@@ -2,7 +2,7 @@
 
 ## 0. The source of truth (read this first)
 
-`docs/USECASE.md` (verbatim copy of `docs/LoanLensAI_Hackathon_Usecase.docx`) is the **hackathon-mandated brief. Treat it as the holy grail.**
+`docs/USECASE.md` (verbatim copy of `docs/archive/LoanLensAI_Hackathon_Usecase.docx`) is the **hackathon-mandated brief. Treat it as the holy grail.**
 
 - Every functional requirement, field name, status value, guardrail, example question, and deliverable in it is **mandatory**, not a suggestion.
 - If anything in this file, in `REQUIREMENTS.md`, or in your own judgement conflicts with the brief, **the brief wins**.
@@ -11,7 +11,7 @@
 - Before starting any task, re-read the relevant section of `docs/USECASE.md`. Before finishing, tick the matching IDs in `REQUIREMENTS.md` with the file path that proves it.
 - JSON responses must use the **exact field names and shapes** shown in the brief's "Expected Response" / "Expected Output" blocks.
 
-## 1. Stack (brief *recommends* Spring; it *permits* any framework — see Decisions.md ADR-0)
+## 1. Stack (brief *recommends* Spring; it *permits* any framework — see docs/archive/Decisions.md ADR-0)
 
 - Frontend: React 19 + Vite + TypeScript + Tailwind
 - Backend: Node 22 + Express + TypeScript, Prisma ORM, Zod validation, Vercel AI SDK v5 (`ai` + `@ai-sdk/openai-compatible`) for LLM calls, tool calling and structured output
@@ -42,7 +42,7 @@
 
 ## 4. Division of work (parallel)
 
-- Three Antigravity (Gemini) sessions on three devices: S1 `backend/src/core`, S2 `backend/src/ai`, S3 `frontend/`. See `Team_Work_Split.md` and `prompts/`.
+- Three Antigravity (Gemini) sessions on three devices: S1 `backend/src/core`, S2 `backend/src/ai`, S3 `frontend/`. See `docs/archive/Team_Work_Split.md` and `docs/archive/prompts/`.
 - Nobody edits another session's directory. Contract changes go through `openapi.yaml` first.
 
 ## 5. Repo layout
@@ -56,7 +56,7 @@ loanlens/
     USECASE.md             # holy grail (do not edit)
     LoanLensAI_Hackathon_Usecase.docx
     ASSUMPTIONS.md
-    (architecture lives in root Architecture.md + Preliminary_Design.md)
+    (architecture lives in root docs/archive/Architecture.md + docs/archive/Preliminary_Design.md)
     GUARDRAILS.md          # AI guardrails, known limitations, responsible-AI decisions
     TEST_PROMPTS.md        # every prompt used in the demo
     SETUP.md

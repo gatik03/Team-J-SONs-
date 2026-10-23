@@ -1,9 +1,15 @@
 import { Router } from 'express';
-import { LoginSchema } from './schemas';
+import { LoginSchema, RegistrationSchema } from './schemas';
 import * as authService from './service';
 import { requireAuth } from '../../common/auth';
 
 export const authRouter = Router();
+
+authRouter.post('/register', async (req, res, next) => {
+  try {
+    res.status(201).json(await authService.register(RegistrationSchema.parse(req.body)));
+  } catch (err) { next(err); }
+});
 
 authRouter.post('/login', async (req, res, next) => {
   try {

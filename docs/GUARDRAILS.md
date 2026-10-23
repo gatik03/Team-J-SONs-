@@ -20,7 +20,7 @@ The fixed orchestrator invokes tools from code. This is not autonomous lending o
 
 ## Known limitations
 
-- Login is a seeded username/shared password, not production identity. Bureau, income and KYC tools are synthetic, not real verification.
+- Seeded accounts use a shared demo password. New customer registration uses salted scrypt password hashes, strict validation, unique usernames and pending KYC; it cannot assign staff roles. There is no email verification, password reset, login throttling or production identity service. Bureau, income and KYC tools remain synthetic.
 - Hosted chat/embeddings need network, keys and quota. Timeouts/rate limits/outages can still fail essential requests. Structured calls have at most two application-owned attempts; latency is not guaranteed.
 - Retrieval evaluation uses a small synthetic corpus/prompt set. Citations/numeric checks are not full semantic entailment or comprehensive prompt-injection, fairness or safety defenses.
 - Regex masking can over-mask long numbers and miss unfamiliar formats. Use synthetic data only.

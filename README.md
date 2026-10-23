@@ -64,6 +64,8 @@ Open **http://localhost:5173**. [Detailed setup and troubleshooting](docs/SETUP.
 
 Every demo password is **`password`**. Authentication is simulated for the hackathon.
 
+New customers can select **Create a customer account** on the sign-in screen, or open `/register`. Registered accounts use their own salted, hashed password and start with pending KYC. Staff roles cannot be self-registered. Apply migrations before starting an updated backend.
+
 | Role | Username |
 |---|---|
 | Customer — salaried | `priya.sharma` |

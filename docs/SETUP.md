@@ -50,6 +50,8 @@ npm run dev
 
 Open **http://localhost:5173**. [Demo logins](../README.md#demo-logins) all use password `password`.
 
+To create a new customer, choose **Create a customer account** on the login screen. Complete the profile and choose a password of at least 8 characters. Registration signs you in automatically; future logins use that username/password. KYC starts pending, and staff roles cannot self-register. Existing checkouts must run `npm run prisma -- migrate deploy` and `npm run prisma -- generate` in `backend/` after updating.
+
 ## Built application
 
 Run `npm run build` in `frontend/`, then `npm start` in `backend/`. Open **http://localhost:8080**. Express serves the built UI, API and nested-route reloads. These commands do not deploy externally.

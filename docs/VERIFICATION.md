@@ -2,7 +2,7 @@
 
 ## Checks performed in this pass
 
-- Backend: **105 tests across 21 files passed**; database suites ran against local PostgreSQL. AI provider calls are mocked in automated tests.
+- Backend: **109 tests across 22 files passed**; database suites ran against local PostgreSQL. AI provider calls are mocked in automated tests.
 - Frontend: **14 tests across 5 files passed**; production Vite/TypeScript build passed.
 - Backend TypeScript build passed; Prisma reported that `backend/prisma/schema.prisma` is valid.
 - Documentation reorganized without changing runtime source paths. Current submission docs map every requested deliverable to implementation/evidence.
@@ -11,6 +11,8 @@
 - Both ZIP integrity checks passed. Extracted source documentation links/assets passed; private-file/dependency exclusions passed. A separate comparison confirmed neither ZIP contains either actual API key from the local `.env`.
 
 ## Earlier runtime evidence retained
+
+Registration follow-up: migration applied and Prisma client regenerated. Four HTTP tests cover strict validation/staff-role injection, atomic account/profile creation, duplicate rejection and password authentication (including rejection of the shared demo password for registered users). Real-browser checks cover the sign-up link, password confirmation, mobile layout, automatic sign-in, persisted profile and fresh-session login. See `docs/evidence/registration-qa.json` and `registration-mobile.png`. Registered passwords use salted scrypt hashes; seeded demo sign-in remains simulated.
 
 `docs/evidence/` contains actual local browser/runtime records for six logins; catalogue, filtering, compare and EMI; application draft/upload/submission; officer pre-screen and audit; human analyst decision; live advisor and policy questions; policy draft/test/publish/retire; 57 responsive route checks; and production same-origin API/deep-link smoke checks.
 

@@ -49,11 +49,12 @@ enum DocumentType {
   INCOME
 }
 
-/// Simulated auth (brief: auth "already exists and can be simulated"). Every demo user's password is "password"; no password column.
+/// Seeded users use simulated login; registered customers have a salted scrypt hash.
 model AppUser {
   username    String    @id
   role        Role
   displayName String    @map("display_name")
+  passwordHash String?  @map("password_hash")
   customerId  String?   @unique @map("customer_id")
   customer    Customer? @relation(fields: [customerId], references: [customerId])
 

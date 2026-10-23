@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Navigate, useNavigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import { Landmark, ShieldCheck, ArrowRight } from "lucide-react";
 import { useLogin } from "../api/hooks/auth";
 import { useAuth } from "../auth/AuthContext";
@@ -99,6 +99,7 @@ export function LoginPage() {
               <ArrowRight size={18} />
             </Button>
           </form>
+          <p className="mt-5 text-sm">New here? <Link to="/register" className="text-primary font-semibold underline">Create a customer account</Link></p>
           <div className="demo-heading">
             <span>Explore a demo workspace</span>
           </div>

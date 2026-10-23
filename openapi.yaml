@@ -27,11 +27,39 @@ tags:
 
 paths:
   # ---------------- AUTH (S1) ----------------
+  /api/auth/register:
+    post:
+      tags: [auth]
+      security: []
+      summary: Register a customer account and return a login token
+      description: Staff roles cannot be self-registered. Passwords are salted and hashed; the customer starts with pending KYC.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [username, password, fullName, email, phone, dateOfBirth, segment, monthlyIncome, location]
+              properties:
+                username: { type: string, minLength: 3, maxLength: 40, pattern: '^[a-zA-Z0-9][a-zA-Z0-9._-]*$' }
+                password: { type: string, minLength: 8, maxLength: 128, format: password, writeOnly: true }
+                fullName: { type: string, minLength: 2, maxLength: 100 }
+                email: { type: string, format: email, maxLength: 254 }
+                phone: { type: string, pattern: '^[+0-9 ()-]{7,20}$' }
+                dateOfBirth: { type: string, format: date, description: Past calendar date, 1900 or later }
+                segment: { type: string, enum: [SALARIED, SELF_EMPLOYED, STUDENT] }
+                monthlyIncome: { type: integer, minimum: 0, maximum: 100000000 }
+                location: { type: string, minLength: 2, maxLength: 100 }
+      responses:
+        "201": { $ref: '#/paths/~1api~1auth~1login/post/responses/200' }
+        "400": { $ref: '#/components/responses/Error' }
+        "409": { $ref: '#/components/responses/Error' }
   /api/auth/login:
     post:
       tags: [auth]
       security: []
-      summary: Login with seeded demo users (simulated auth)
+      summary: Login with a seeded demo account or a registered customer's password
       requestBody:
         required: true
         content:

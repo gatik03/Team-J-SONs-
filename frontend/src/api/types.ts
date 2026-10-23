@@ -22,6 +22,10 @@ export type ProductSort = 'rate_asc' | 'rate_desc' | 'amount_asc' | 'amount_desc
 export interface ErrorResponse { status: number; code: string; message: string; details?: { field?: string; issue?: string }[]; timestamp: string; path?: string }
 
 export interface LoginRequest { username: string; password: string }
+export interface RegistrationRequest extends LoginRequest {
+  fullName: string; email: string; phone: string; dateOfBirth: string;
+  segment: CustomerSegment; monthlyIncome: number; location: string;
+}
 export interface LoginResponse { token: string; role: Role; customerId: string | null; displayName: string }
 export interface Me { username: string; role: Role; customerId: string | null }
 

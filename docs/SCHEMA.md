@@ -15,7 +15,7 @@ erDiagram
 
 | Area | Constraints and rationale |
 |---|---|
-| Users | Username primary key, enum role, optional unique customer foreign key. Authentication is simulated. |
+| Users | Username primary key, enum role, optional unique customer foreign key; nullable salted password hash for registered customers. Seeded accounts retain simulated login. Registration creates user/profile atomically with customer-only role and pending KYC. |
 | Applications | Customer/product foreign keys, nullable draft fields, enum status, customer/status indexes. Amounts/EMIs use integer rupees; indicative rates use floating point. |
 | Timeline/uploads | Application foreign keys with cascade delete; file metadata separated from local bytes. Seed document rows support mock verification. |
 | Policy versions | Unique `(documentKey, version)`; index `(documentKey, status, effectiveDate)`; publication/retirement actor/time; no mutable latest flag. |

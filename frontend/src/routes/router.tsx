@@ -5,6 +5,7 @@ import { RoleGuard } from './RoleGuard';
 import { AppLayout } from '../layouts/AppLayout';
 
 import { LoginPage } from '../pages/LoginPage';
+import { RegisterPage } from '../pages/RegisterPage';
 import { ForbiddenPage } from '../pages/ForbiddenPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { CataloguePage } from '../pages/CataloguePage';
@@ -32,6 +33,7 @@ function RootRedirect() {
 
 export const router = createBrowserRouter([
   // Public routes
+  { path: '/register', element: <RegisterPage /> },
   {
     path: '/login',
     element: <LoginPage />,

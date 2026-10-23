@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "date": "2026-10-23",
+  "checks": [
+    "login link",
+    "password confirmation",
+    "mobile no overflow",
+    "registration and automatic sign-in",
+    "saved profile",
+    "hashed password and customer-only role",
+    "fresh-session login"
+  ],
+  "errors": []
+}

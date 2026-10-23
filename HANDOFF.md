@@ -36,3 +36,9 @@ The browser evidence includes a 404 for `workflow/applications/LA-2026-28805/rec
 `customerUpdate` is a safe projection on the owning customer's application, containing only `customerMessage` and `missingDocuments`; the customer status UI never requests the staff-only recommendation endpoint. Draft save failures remain visible without losing fields. Final credit transitions compare current status inside the update transaction, so concurrent decisions cannot overwrite each other.
 
 `docs/evidence/human-decision.json` and `human-decision.png` also prove an explicit analyst UI decision persisted REJECTED on the synthetic QA application. Mobile navigation was verified to move focus into the drawer, close with Escape, and return focus to the menu button; closed off-canvas links are hidden from keyboard focus.
+
+## Advisor latency follow-up — 23 October 2026
+
+Live testing reproduced an extraction timeout: one request took 37.3 seconds and the next returned AI_UNAVAILABLE after 40 seconds. Structured generation now has one retry owner (two total attempts, with a 500 ms pause), instead of multiplying SDK and application retries. Advisor extraction is limited to 512 output tokens. Optional reason wording has one attempt, 256 output tokens and a 3-second deadline; on failure the existing calculated explanation is returned. Essential extraction still fails safely if both provider attempts fail; no loan facts are invented to hide an outage.
+
+Two follow-up live requests with the same used-car message returned HTTP 200 in 5.0 and 11.6 seconds; both used the explanation fallback. These are spot timings, not a latency guarantee. Backend verification: 104 tests pass and TypeScript build passes. Frontend code was unchanged and frontend tests were not rerun for this follow-up.

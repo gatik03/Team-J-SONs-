@@ -64,7 +64,7 @@ export async function advisorChat(message: string, conversationId: string | null
   const previous = conversations.get(memoryKey);
 
   // Step 1 — the LLM only extracts; it never computes.
-  const extraction = await structured({ schema: ExtractionSchema, system: EXTRACT_SYSTEM,
+  const extraction = await structured({ schema: ExtractionSchema, system: EXTRACT_SYSTEM, maxOutputTokens: 512,
     prompt: `Known so far: ${previous ? JSON.stringify(previous) : 'nothing'}\nCustomer message: ${maskPii(message)}` });
   const merged = { ...(previous ?? {}) } as Extraction;
   for (const [k, v] of Object.entries(extraction)) if (v != null) (merged as Record<string, unknown>)[k] = v;
@@ -138,7 +138,8 @@ export async function advisorChat(message: string, conversationId: string | null
 
   // Step 3 — the LLM writes only the reason text; every number is guarded, else the template above stays.
   try {
-    const { reasons } = await structured({ schema: ReasonsSchema, system: REASON_SYSTEM, prompt: JSON.stringify(top.map((s) => ({
+    // Optional wording must not hold up the already-calculated recommendations.
+    const { reasons } = await structured({ schema: ReasonsSchema, system: REASON_SYSTEM, timeoutMs: 3000, retries: 0, maxOutputTokens: 256, prompt: JSON.stringify(top.map((s) => ({
       productId: s.rec.productId, productName: s.rec.productName, tenureMonths: s.rec.tenureMonths, estimatedEmi: s.rec.estimatedEmi,
       indicativeInterestRate: s.rec.indicativeInterestRate, maxPreferredEmi, pctOfIncome: s.pctOfIncome, fitsPreference: s.fitsPreference,
       eligibilityIndicator: s.rec.eligibilityIndicator }))) });

@@ -13,7 +13,19 @@ describe('LLM boundary', () => {
     vi.mocked(generateObject).mockRejectedValueOnce(new Error('Provider failed')).mockResolvedValueOnce({ object: { answer: 'OK' } } as never);
     expect(await structured({ schema: z.object({ answer: z.string() }), system: 'PAN ABCDE1234F', prompt: 'Aadhaar 1234 5678 9012' })).toEqual({ answer: 'OK' });
     expect(generateObject).toHaveBeenCalledTimes(2);
-    expect(vi.mocked(generateObject).mock.calls[0][0]).toMatchObject({ system: 'PAN XXXXX1234X', prompt: 'Aadhaar XXXX-XXXX-9012', abortSignal: expect.any(AbortSignal) });
+    expect(vi.mocked(generateObject).mock.calls[0][0]).toMatchObject({ system: 'PAN XXXXX1234X', prompt: 'Aadhaar XXXX-XXXX-9012', maxRetries: 0, abortSignal: expect.any(AbortSignal) });
+  });
+
+  it('bounds optional generation to one attempt and its shorter deadline', async () => {
+    const timeout = vi.spyOn(AbortSignal, 'timeout');
+    vi.mocked(generateObject).mockRejectedValueOnce(new Error('Provider failed'));
+    try {
+      await expect(structured({ schema: z.object({ answer: z.string() }), system: 's', prompt: 'p', timeoutMs: 3000, retries: 0, maxOutputTokens: 256 }))
+        .rejects.toMatchObject({ status: 503, code: 'AI_UNAVAILABLE' });
+      expect(generateObject).toHaveBeenCalledTimes(1);
+      expect(timeout).toHaveBeenCalledWith(3000);
+      expect(vi.mocked(generateObject).mock.calls[0][0]).toMatchObject({ maxRetries: 0, maxOutputTokens: 256 });
+    } finally { timeout.mockRestore(); }
   });
 
   it('two structured failures become the public 503 envelope error', async () => {

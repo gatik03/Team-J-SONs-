@@ -12,16 +12,19 @@ export const chatModel = provider(env.LL_AI_CHAT_MODEL);
 const unavailable = () => new AppError(503, 'AI_UNAVAILABLE', 'The AI service is unavailable. Please try again.');
 
 /** Structured LLM output validated by a zod schema. Prompt is PII-masked. One retry, then AI_UNAVAILABLE. */
-export async function structured<T>(args: { schema: z.ZodType<T>; system: string; prompt: string }): Promise<T> {
+export async function structured<T>(args: { schema: z.ZodType<T>; system: string; prompt: string; timeoutMs?: number; retries?: 0 | 1; maxOutputTokens?: number }): Promise<T> {
   if (!env.LL_AI_API_KEY) throw unavailable();
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  const attempts = 1 + (args.retries ?? 1);
+  for (let attempt = 1; attempt <= attempts; attempt++) {
     const t0 = Date.now();
     try {
-      const { object } = await generateObject({ model: chatModel, schema: args.schema, system: maskPii(args.system), prompt: maskPii(args.prompt), temperature: 0, maxRetries: 1, abortSignal: AbortSignal.timeout(20_000) });
+      // This loop owns retries; SDK retries would multiply requests and latency.
+      const { object } = await generateObject({ model: chatModel, schema: args.schema, system: maskPii(args.system), prompt: maskPii(args.prompt), temperature: 0, maxRetries: 0, maxOutputTokens: args.maxOutputTokens, abortSignal: AbortSignal.timeout(args.timeoutMs ?? 20_000) });
       logger.info({ kind: 'llm', ms: Date.now() - t0, attempt }, 'llm call');
       return object as T;
     } catch (err) {
       logger.warn({ kind: 'llm', ms: Date.now() - t0, attempt, err: (err as Error).message }, 'llm call failed');
+      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }
   throw unavailable();

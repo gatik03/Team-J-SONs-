@@ -23,6 +23,7 @@ describe('advisorChat', () => {
     expect(r).toMatchObject({ loanAmount: 500000, monthlyIncome: 60000, maxPreferredEmi: 12000, currency: 'INR',
       disclaimer: 'Indicative only. Final approval is subject to credit assessment.', clarifyingQuestion: null });
     expect(r.conversationId).toMatch(/^CONV-/);
+    expect(mocked).toHaveBeenNthCalledWith(2, expect.objectContaining({ timeoutMs: 3000, retries: 0, maxOutputTokens: 256 }));
   });
 
   it('asks a clarifying question when amount and purpose are missing, then uses conversation memory', async () => {

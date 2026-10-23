@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 *.log
 node_modules/
 dist/
@@ -6,6 +8,7 @@ target/
 build/
 .idea/
 .vscode/
+.claude/
 *.iml
 .DS_Store
 docs/full-stack/
@@ -19,3 +22,7 @@ docker-compose.override.yml
 
 .playwright-mcp/
 artifacts/
+coverage/
+*.tsbuildinfo
+__pycache__/
+*.pyc

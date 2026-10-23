@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  LOAN_OFFICER
+  CREDIT_ANALYST
+  POLICY_ADMIN
+}
+
+enum LoanType {
+  PERSONAL
+  HOME
+  VEHICLE
+  EDUCATION
+}
+
+enum CustomerSegment {
+  SALARIED
+  SELF_EMPLOYED
+  STUDENT
+}
+
+enum KycStatus {
+  VERIFIED
+  PENDING
+  FAILED
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_VERIFICATION
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DISBURSED
+}
+
+enum DocumentType {
+  IDENTITY
+  ADDRESS
+  INCOME
+}
+
+/// Simulated auth (brief: auth "already exists and can be simulated"). Every demo user's password is "password"; no password column.
+model AppUser {
+  username    String    @id
+  role        Role
+  displayName String    @map("display_name")
+  customerId  String?   @unique @map("customer_id")
+  customer    Customer? @relation(fields: [customerId], references: [customerId])
+
+  @@map("app_user")
+}
+
+/// Guardrail G-1: deliberately NO gender, religion, caste or marital-status columns. Protected attributes are never stored, so no decision path can use them.
+model Customer {
+  customerId                 String            @id @map("customer_id")
+  fullName                   String            @map("full_name")
+  email                      String
+  phone                      String
+  segment                    CustomerSegment
+  employmentType             String            @map("employment_type")
+  monthlyIncome              Int               @map("monthly_income")
+  existingMonthlyObligations Int               @map("existing_monthly_obligations")
+  location                   String
+  kycStatus                  KycStatus         @map("kyc_status")
+  dateOfBirth                DateTime          @map("date_of_birth") @db.Date
+  /// Fake PAN/Aadhaar text, internal only, never returned by the API. Exists so S2 can demonstrate PII masking in prompts/logs (M2-8).
+  kycRef                     String?           @map("kyc_ref")
+  user                       AppUser?
+  applications               LoanApplication[]
+
+  @@map("customer")
+}
+
+model LoanProduct {
+  productId            String            @id @map("product_id")
+  name                 String
+  loanType             LoanType          @map("loan_type")
+  description          String
+  minInterestRate      Float             @map("min_interest_rate")
+  maxInterestRate      Float             @map("max_interest_rate")
+  /// Internal (not in openapi LoanProduct): rate used for indicative EMIs by the advisor and application.estimatedEmi.
+  indicativeRate       Float             @map("indicative_rate")
+  minTenureMonths      Int               @map("min_tenure_months")
+  maxTenureMonths      Int               @map("max_tenure_months")
+  minAmount            Int               @map("min_amount")
+  maxAmount            Int               @map("max_amount")
+  processingFeePercent Float             @map("processing_fee_percent")
+  processingFeeMin     Int               @map("processing_fee_min")
+  /// Internal (not in openapi LoanProduct): fee cap, null = no cap.
+  processingFeeMax     Int?              @map("processing_fee_max")
+  /// Shape = openapi LoanProduct.eligibilityCriteria {minMonthlyIncome, minCreditScore, maxObligationRatioPercent, allowedSegments, minAgeYears, maxAgeYears}
+  eligibility          Json
+  applications         LoanApplication[]
+
+  @@map("loan_product")
+}
+
+model LoanApplication {
+  applicationId              String                @id @map("application_id")
+  customerId                 String                @map("customer_id")
+  customer                   Customer              @relation(fields: [customerId], references: [customerId])
+  productId                  String?               @map("product_id")
+  product                    LoanProduct?          @relation(fields: [productId], references: [productId])
+  requestedAmount            Int?                  @map("requested_amount")
+  tenureMonths               Int?                  @map("tenure_months")
+  purpose                    String?
+  employmentType             String?               @map("employment_type")
+  monthlyIncome              Int?                  @map("monthly_income")
+  existingMonthlyObligations Int?                  @map("existing_monthly_obligations")
+  currentStep                Int                   @default(1) @map("current_step")
+  status                     ApplicationStatus     @default(DRAFT)
+  estimatedEmi               Int?                  @map("estimated_emi")
+  createdAt                  DateTime              @default(now()) @map("created_at")
+  updatedAt                  DateTime              @updatedAt @map("updated_at")
+  events                     StatusEvent[]
+  documents                  ApplicationDocument[]
+
+  @@index([customerId])
+  @@index([status])
+  @@map("loan_application")
+}
+
+/// The application timeline. Appended on every transition (Integration_Contracts §5). `actor` is exposed as `by` in JSON.
+model StatusEvent {
+  id            Int               @id @default(autoincrement())
+  applicationId String            @map("application_id")
+  application   LoanApplication   @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
+  status        ApplicationStatus
+  at            DateTime          @default(now())
+  actor         String
+  note          String            @default("")
+
+  @@index([applicationId])
+  @@map("status_event")
+}
+
+model ApplicationDocument {
+  documentId    String          @id @map("document_id")
+  applicationId String          @map("application_id")
+  application   LoanApplication @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
+  documentType  DocumentType    @map("document_type")
+  fileName      String          @map("file_name")
+  storedPath    String          @map("stored_path")
+  contentType   String          @map("content_type")
+  sizeBytes     Int             @map("size_bytes")
+  uploadedAt    DateTime        @default(now()) @map("uploaded_at")
+
+  @@index([applicationId])
+  @@map("application_document")
+}
+
+// ===== S2 models below (owned by S2) =====
+// S2 appends KbDocument, KbChunk, AgentRun, AuditEvent here and migrates with `npm run db:migrate -- --name s2_<topic>`.
+// Rule for S2: store applicationId / customerId as plain String columns with NO @relation to the S1 models above
+// (a relation would force a back-relation field into S1's models). S1 never edits below this line.
+// For reference only (S1 adds none of this): S2's KbDocument is one row per policy VERSION with documentKey,
+// status (DRAFT|PUBLISHED|RETIRED), changeNote, createdBy, publishedBy, publishedAt, retiredAt, retiredReason,
+// @@unique([documentKey, version]) and no isLatest flag (Integration_Contracts §8a).

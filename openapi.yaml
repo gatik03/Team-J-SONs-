@@ -1,0 +1,885 @@
+openapi: 3.0.3
+info:
+  title: LoanLens AI API
+  version: 0.1.0
+  description: |
+    Contract-first API for LoanLens AI (Kestrel Bank). Field names in AdvisorResponse,
+    PolicyAnswer and AgentRecommendation are copied VERBATIM from docs/USECASE.md
+    and must not be renamed. All money is INR integer rupees. All timestamps ISO-8601 UTC.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+  - name: products
+  - name: emi
+  - name: customers
+  - name: applications
+  - name: documents
+  - name: advisor
+  - name: knowledge
+  - name: policy-admin
+  - name: policy
+  - name: workflow
+  - name: audit
+
+paths:
+  # ---------------- AUTH (S1) ----------------
+  /api/auth/login:
+    post:
+      tags: [auth]
+      security: []
+      summary: Login with seeded demo users (simulated auth)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string, example: priya.sharma }
+                password: { type: string, example: password }
+      responses:
+        "200":
+          description: JWT + role
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  role: { $ref: "#/components/schemas/Role" }
+                  customerId: { type: string, nullable: true, example: CUST-1001 }
+                  displayName: { type: string }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /api/auth/me:
+    get:
+      tags: [auth]
+      responses:
+        "200":
+          description: Current principal
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username: { type: string }
+                  role: { $ref: "#/components/schemas/Role" }
+                  customerId: { type: string, nullable: true }
+
+  # ---------------- PRODUCTS (S1) ----------------
+  /api/products:
+    get:
+      tags: [products]
+      security: []
+      summary: Catalogue with search, filter, sort
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: loanType, in: query, schema: { $ref: "#/components/schemas/LoanType" } }
+        - { name: segment, in: query, schema: { $ref: "#/components/schemas/CustomerSegment" } }
+        - { name: minAmount, in: query, schema: { type: integer } }
+        - { name: maxAmount, in: query, schema: { type: integer } }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [rate_asc, rate_desc, amount_asc, amount_desc, tenure_asc, tenure_desc, name] }
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LoanProduct" }
+
+  /api/products/{productId}:
+    get:
+      tags: [products]
+      security: []
+      parameters:
+        - { name: productId, in: path, required: true, schema: { type: string, example: VL-204 } }
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoanProduct" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /api/products/compare:
+    get:
+      tags: [products]
+      security: []
+      summary: Compare 2-4 products side by side
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          description: Comma-separated product IDs
+          schema: { type: string, example: "PL-101,PL-102" }
+      responses:
+        "200":
+          description: Products in requested order
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LoanProduct" }
+
+  # ---------------- EMI (S1, deterministic code) ----------------
+  /api/emi/calculate:
+    post:
+      tags: [emi]
+      security: []
+      summary: EMI + full amortization schedule (computed in code, never by LLM)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [principal, annualRate, tenureMonths]
+              properties:
+                principal: { type: integer, minimum: 1, example: 500000 }
+                annualRate: { type: number, minimum: 0, example: 11.0 }
+                tenureMonths: { type: integer, minimum: 1, maximum: 360, example: 60 }
+      responses:
+        "200":
+          description: Schedule
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmiResult" }
+        "400": { $ref: "#/components/responses/Error" }
+
+  # ---------------- CUSTOMERS (S1) ----------------
+  /api/customers/me:
+    get:
+      tags: [customers]
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CustomerProfile" }
+    put:
+      tags: [customers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomerProfileUpdate" }
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CustomerProfile" }
+
+  # ---------------- APPLICATIONS (S1) ----------------
+  /api/applications:
+    get:
+      tags: [applications]
+      summary: Customer sees own; Loan Officer / Credit Analyst see all (filterable)
+      parameters:
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/ApplicationStatus" } }
+      responses:
+        "200":
+          description: Applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LoanApplication" }
+    post:
+      tags: [applications]
+      summary: Create a Draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoanApplicationDraft" }
+      responses:
+        "201":
+          description: Draft created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoanApplication" }
+
+  /api/applications/{applicationId}:
+    get:
+      tags: [applications]
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+      responses:
+        "200":
+          description: Application with timeline
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoanApplication" }
+        "404": { $ref: "#/components/responses/Error" }
+    put:
+      tags: [applications]
+      summary: Save draft (any step)
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoanApplicationDraft" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoanApplication" }
+
+  /api/applications/{applicationId}/submit:
+    post:
+      tags: [applications]
+      summary: Draft -> Submitted (validates all steps complete)
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+      responses:
+        "200":
+          description: Submitted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoanApplication" }
+        "400": { $ref: "#/components/responses/Error" }
+
+  /api/applications/{applicationId}/decision:
+    post:
+      tags: [applications]
+      summary: Human decision (CREDIT_ANALYST only). Agents never call this.
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision, reason]
+              properties:
+                decision: { type: string, enum: [APPROVED, REJECTED] }
+                reason: { type: string, minLength: 10 }
+      responses:
+        "200":
+          description: Decided
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoanApplication" }
+        "403": { $ref: "#/components/responses/Error" }
+
+  /api/applications/{applicationId}/documents:
+    get:
+      tags: [documents]
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+      responses:
+        "200":
+          description: Uploaded documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ApplicationDocument" }
+    post:
+      tags: [documents]
+      summary: Upload identity / address / income proof
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [documentType, file]
+              properties:
+                documentType: { $ref: "#/components/schemas/DocumentType" }
+                file: { type: string, format: binary }
+      responses:
+        "201":
+          description: Stored
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationDocument" }
+
+  # ---------------- ADVISOR (S2, Module 1 AI) ----------------
+  /api/advisor/chat:
+    post:
+      tags: [advisor]
+      summary: AI Loan Advisor — natural language to structured recommendation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                  example: "I need ₹5 lakh for a used car. I earn ₹60,000 per month and want an EMI below ₹12,000."
+                conversationId: { type: string, nullable: true }
+      responses:
+        "200":
+          description: Brief's Module 1 Expected Response (verbatim fields)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdvisorResponse" }
+
+  # ---------------- KNOWLEDGE BASE (S2, Module 2) ----------------
+  /api/knowledge/documents:
+    get:
+      tags: [knowledge]
+      summary: List policy versions currently in force (LOAN_OFFICER / CREDIT_ANALYST / POLICY_ADMIN). Read-only; changes go through /api/admin/policies.
+      responses:
+        "200":
+          description: Active versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/KnowledgeDocument" }
+
+  # ---------------- POLICY ADMIN (S2 API, S3 console) ----------------
+  /api/admin/policies:
+    get:
+      tags: [policy-admin]
+      summary: Policy library — one row per documentKey (POLICY_ADMIN)
+      responses:
+        "200":
+          description: Library
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PolicyLibraryItem" }
+    post:
+      tags: [policy-admin]
+      summary: Upload a new version as DRAFT (PDF, MD, CSV, JSON); chunked and embedded immediately, not served until published
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, documentKey, title, version, effectiveDate, loanType, documentType, audience, changeNote]
+              properties:
+                file: { type: string, format: binary }
+                documentKey: { type: string, example: "VEHICLE-TNC", description: "Stable id shared by all versions of one policy (new key = new policy)" }
+                title: { type: string, example: "Vehicle Loan Terms and Conditions" }
+                version: { type: string, example: "2026.4" }
+                effectiveDate: { type: string, format: date, example: "2026-11-01" }
+                loanType: { $ref: "#/components/schemas/LoanTypeOrAll" }
+                documentType: { $ref: "#/components/schemas/KnowledgeDocumentType" }
+                audience: { $ref: "#/components/schemas/Audience" }
+                customerSegment: { $ref: "#/components/schemas/CustomerSegmentOrAll" }
+                changeNote: { type: string, minLength: 5, example: "Foreclosure lock-in reduced from 6 to 3 EMIs" }
+      responses:
+        "201":
+          description: Draft created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PolicyVersion" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /api/admin/policies/{documentKey}/versions:
+    get:
+      tags: [policy-admin]
+      summary: Full version history of one policy, newest first (POLICY_ADMIN)
+      parameters:
+        - { name: documentKey, in: path, required: true, schema: { type: string, example: VEHICLE-TNC } }
+      responses:
+        "200":
+          description: Versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PolicyVersion" }
+
+  /api/admin/policies/versions/{documentId}/preview:
+    get:
+      tags: [policy-admin]
+      summary: Sections exactly as chunked, for review before publishing (POLICY_ADMIN)
+      parameters:
+        - { $ref: "#/components/parameters/documentId" }
+      responses:
+        "200":
+          description: Chunks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    section: { type: string }
+                    content: { type: string }
+
+  /api/admin/policies/versions/{documentId}/test-ask:
+    post:
+      tags: [policy-admin]
+      summary: Ask a question against THIS version only (works for DRAFT) to verify before publishing (POLICY_ADMIN)
+      parameters:
+        - { $ref: "#/components/parameters/documentId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string }
+      responses:
+        "200":
+          description: Same shape as the brief's PolicyAnswer
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PolicyAnswer" }
+
+  /api/admin/policies/versions/{documentId}/publish:
+    post:
+      tags: [policy-admin]
+      summary: DRAFT -> PUBLISHED. Served from its effectiveDate (future date = scheduled). Immutable afterwards (POLICY_ADMIN)
+      parameters:
+        - { $ref: "#/components/parameters/documentId" }
+      responses:
+        "200":
+          description: Published
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PolicyVersion" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /api/admin/policies/versions/{documentId}/retire:
+    post:
+      tags: [policy-admin]
+      summary: PUBLISHED -> RETIRED (rollback). The previous published version in force becomes active again (POLICY_ADMIN)
+      parameters:
+        - { $ref: "#/components/parameters/documentId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, minLength: 5 }
+      responses:
+        "200":
+          description: Retired
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PolicyVersion" }
+        "409": { $ref: "#/components/responses/Error" }
+
+  /api/policy/ask:
+    post:
+      tags: [policy]
+      summary: RAG policy assistant — grounded only in approved docs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string, example: "Can I foreclose my vehicle loan after six months, and are there any charges?" }
+                loanType: { $ref: "#/components/schemas/LoanTypeOrAll" }
+                customerSegment: { $ref: "#/components/schemas/CustomerSegmentOrAll" }
+      responses:
+        "200":
+          description: Brief's Module 2 Expected Output (verbatim fields). Audience filter is derived from caller role, never from the request.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PolicyAnswer" }
+
+  # ---------------- AGENTIC WORKFLOW (S2, Module 3) ----------------
+  /api/workflow/applications/{applicationId}/run:
+    post:
+      tags: [workflow]
+      summary: Run the orchestrator over a Submitted application (LOAN_OFFICER / CREDIT_ANALYST)
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+        - name: demoPermissionViolation
+          in: query
+          required: false
+          description: Staff-only demo switch. Makes CustomerCommunicationAgent attempt get_credit_score, which is refused and logged as PERMISSION_DENIED.
+          schema: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Brief's Module 3 Expected Output (verbatim fields)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentRecommendation" }
+        "409":
+          description: Application not in a runnable status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /api/workflow/applications/{applicationId}/recommendation:
+    get:
+      tags: [workflow]
+      summary: Latest recommendation for the application
+      parameters:
+        - { $ref: "#/components/parameters/applicationId" }
+      responses:
+        "200":
+          description: Recommendation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentRecommendation" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /api/audit/{auditTrailId}:
+    get:
+      tags: [audit]
+      summary: Full audit trail (every agent step, tool call, input, output, timestamp)
+      parameters:
+        - { name: auditTrailId, in: path, required: true, schema: { type: string, example: AUD-2026-77301 } }
+      responses:
+        "200":
+          description: Trail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditTrail" }
+
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+
+  parameters:
+    documentId:
+      name: documentId
+      in: path
+      required: true
+      schema: { type: string, example: KB-0007 }
+    applicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema: { type: string, example: LA-2026-00418 }
+
+  responses:
+    Error:
+      description: Error envelope (same shape on every endpoint)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  schemas:
+    # ---- enums ----
+    Role: { type: string, enum: [CUSTOMER, LOAN_OFFICER, CREDIT_ANALYST, POLICY_ADMIN] }
+    PolicyStatus: { type: string, enum: [DRAFT, PUBLISHED, RETIRED] }
+    LoanType: { type: string, enum: [PERSONAL, HOME, VEHICLE, EDUCATION] }
+    LoanTypeOrAll: { type: string, enum: [PERSONAL, HOME, VEHICLE, EDUCATION, ALL] }
+    CustomerSegment: { type: string, enum: [SALARIED, SELF_EMPLOYED, STUDENT] }
+    CustomerSegmentOrAll: { type: string, enum: [SALARIED, SELF_EMPLOYED, STUDENT, ALL] }
+    ApplicationStatus:
+      type: string
+      enum: [DRAFT, SUBMITTED, UNDER_VERIFICATION, UNDER_REVIEW, APPROVED, REJECTED, DISBURSED]
+    DocumentType: { type: string, enum: [IDENTITY, ADDRESS, INCOME] }
+    KnowledgeDocumentType:
+      type: string
+      enum: [TERMS_AND_CONDITIONS, RATE_FEE_SCHEDULE, CREDIT_POLICY, KYC_CHECKLIST, PREPAYMENT_POLICY, GRIEVANCE, REGULATORY_CIRCULAR, OFFICER_PLAYBOOK]
+    Audience: { type: string, enum: [CUSTOMER, INTERNAL] }
+    EligibilityIndicator: { type: string, enum: [LIKELY_ELIGIBLE, BORDERLINE, UNLIKELY_ELIGIBLE, UNKNOWN] }
+    Confidence: { type: string, enum: [HIGH, MEDIUM, LOW] }
+    RiskBand: { type: string, enum: [LOW, MEDIUM, HIGH] }
+    Recommendation:
+      type: string
+      enum: [RECOMMEND_APPROVE, RECOMMEND_REJECT, REQUEST_ADDITIONAL_DOCUMENTS, REFER_TO_HUMAN]
+    CheckResult: { type: string, enum: [PASS, FAIL, INCOMPLETE, EXCEPTION] }
+
+    # ---- error ----
+    ErrorResponse:
+      type: object
+      required: [status, code, message, timestamp]
+      properties:
+        status: { type: integer, example: 400 }
+        code: { type: string, example: VALIDATION_FAILED }
+        message: { type: string }
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              issue: { type: string }
+        timestamp: { type: string, format: date-time }
+        path: { type: string }
+
+    # ---- Module 1 ----
+    LoanProduct:
+      type: object
+      required: [productId, name, loanType, minInterestRate, maxInterestRate, minTenureMonths, maxTenureMonths, minAmount, maxAmount, processingFeePercent, eligibilityCriteria]
+      properties:
+        productId: { type: string, example: VL-204 }
+        name: { type: string, example: "Kestrel Pre-Owned Car Loan" }
+        loanType: { $ref: "#/components/schemas/LoanType" }
+        description: { type: string }
+        minInterestRate: { type: number, example: 10.5 }
+        maxInterestRate: { type: number, example: 13.0 }
+        minTenureMonths: { type: integer, example: 12 }
+        maxTenureMonths: { type: integer, example: 84 }
+        minAmount: { type: integer, example: 100000 }
+        maxAmount: { type: integer, example: 2500000 }
+        processingFeePercent: { type: number, example: 1.5 }
+        processingFeeMin: { type: integer, example: 1000 }
+        eligibilityCriteria:
+          type: object
+          properties:
+            minMonthlyIncome: { type: integer, example: 25000 }
+            minCreditScore: { type: integer, example: 650 }
+            maxObligationRatioPercent: { type: integer, example: 50 }
+            allowedSegments:
+              type: array
+              items: { $ref: "#/components/schemas/CustomerSegment" }
+            minAgeYears: { type: integer, example: 21 }
+            maxAgeYears: { type: integer, example: 60 }
+
+    EmiResult:
+      type: object
+      properties:
+        principal: { type: integer }
+        annualRate: { type: number }
+        tenureMonths: { type: integer }
+        emi: { type: integer, example: 10871 }
+        totalInterest: { type: integer }
+        totalPayment: { type: integer }
+        schedule:
+          type: array
+          items:
+            type: object
+            properties:
+              month: { type: integer }
+              openingBalance: { type: integer }
+              emi: { type: integer }
+              principalComponent: { type: integer }
+              interestComponent: { type: integer }
+              closingBalance: { type: integer }
+
+    CustomerProfile:
+      type: object
+      properties:
+        customerId: { type: string, example: CUST-1001 }
+        fullName: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        segment: { $ref: "#/components/schemas/CustomerSegment" }
+        employmentType: { type: string, example: "Private sector salaried" }
+        monthlyIncome: { type: integer, example: 60000 }
+        existingMonthlyObligations: { type: integer, example: 8000 }
+        location: { type: string, example: Pune }
+        kycStatus: { type: string, enum: [VERIFIED, PENDING, FAILED] }
+        dateOfBirth: { type: string, format: date }
+      description: Deliberately has NO gender, religion, caste or marital status fields (guardrail G-1).
+
+    CustomerProfileUpdate:
+      type: object
+      properties:
+        employmentType: { type: string }
+        segment: { $ref: "#/components/schemas/CustomerSegment" }
+        monthlyIncome: { type: integer, minimum: 0 }
+        existingMonthlyObligations: { type: integer, minimum: 0 }
+        location: { type: string }
+
+    LoanApplicationDraft:
+      type: object
+      description: Multi-step form; any subset may be present while DRAFT. All required at submit.
+      properties:
+        productId: { type: string }
+        requestedAmount: { type: integer, minimum: 1 }
+        tenureMonths: { type: integer, minimum: 1 }
+        purpose: { type: string }
+        employmentType: { type: string }
+        monthlyIncome: { type: integer }
+        existingMonthlyObligations: { type: integer }
+        currentStep: { type: integer, minimum: 1, maximum: 4 }
+
+    LoanApplication:
+      allOf:
+        - $ref: "#/components/schemas/LoanApplicationDraft"
+        - type: object
+          properties:
+            applicationId: { type: string, example: LA-2026-00418 }
+            customerId: { type: string }
+            status: { $ref: "#/components/schemas/ApplicationStatus" }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+            estimatedEmi: { type: integer, nullable: true }
+            timeline:
+              type: array
+              items:
+                type: object
+                properties:
+                  status: { $ref: "#/components/schemas/ApplicationStatus" }
+                  at: { type: string, format: date-time }
+                  by: { type: string, example: "priya.sharma" }
+                  note: { type: string }
+            latestRecommendation:
+              nullable: true
+              $ref: "#/components/schemas/AgentRecommendation"
+
+    ApplicationDocument:
+      type: object
+      properties:
+        documentId: { type: string }
+        applicationId: { type: string }
+        documentType: { $ref: "#/components/schemas/DocumentType" }
+        fileName: { type: string }
+        contentType: { type: string }
+        sizeBytes: { type: integer }
+        uploadedAt: { type: string, format: date-time }
+
+    AdvisorResponse:
+      type: object
+      description: VERBATIM from brief Module 1 Expected Response.
+      required: [interpretedRequirement, currency, recommendations, disclaimer, clarifyingQuestion]
+      properties:
+        interpretedRequirement: { type: string, example: "Used car loan of 5 lakh with EMI below 12,000" }
+        loanAmount: { type: integer, nullable: true, example: 500000 }
+        monthlyIncome: { type: integer, nullable: true, example: 60000 }
+        maxPreferredEmi: { type: integer, nullable: true, example: 12000 }
+        currency: { type: string, example: INR }
+        recommendations:
+          type: array
+          items:
+            type: object
+            required: [productId, productName, indicativeInterestRate, tenureMonths, estimatedEmi, reason, eligibilityIndicator]
+            properties:
+              productId: { type: string, example: VL-204 }
+              productName: { type: string, example: "Kestrel Pre-Owned Car Loan" }
+              indicativeInterestRate: { type: number, example: 11.0 }
+              tenureMonths: { type: integer, example: 60 }
+              estimatedEmi: { type: integer, example: 10871 }
+              reason: { type: string, example: "60-month tenure keeps EMI within the limit (about 18% of income)" }
+              eligibilityIndicator: { $ref: "#/components/schemas/EligibilityIndicator" }
+        disclaimer: { type: string, example: "Indicative only. Final approval is subject to credit assessment." }
+        clarifyingQuestion: { type: string, nullable: true }
+        conversationId: { type: string }
+
+    # ---- Module 2 ----
+    KnowledgeDocument:
+      type: object
+      properties:
+        documentId: { type: string }
+        title: { type: string, example: "Vehicle Loan Terms and Conditions" }
+        version: { type: string, example: "2026.3" }
+        effectiveDate: { type: string, format: date, example: "2026-07-01" }
+        loanType: { $ref: "#/components/schemas/LoanTypeOrAll" }
+        documentType: { $ref: "#/components/schemas/KnowledgeDocumentType" }
+        audience: { $ref: "#/components/schemas/Audience" }
+        customerSegment: { $ref: "#/components/schemas/CustomerSegmentOrAll" }
+        chunkCount: { type: integer }
+        documentKey: { type: string, example: VEHICLE-TNC }
+        status: { $ref: "#/components/schemas/PolicyStatus" }
+        ingestedAt: { type: string, format: date-time }
+
+    PolicyVersion:
+      allOf:
+        - $ref: "#/components/schemas/KnowledgeDocument"
+        - type: object
+          properties:
+            changeNote: { type: string }
+            createdBy: { type: string, example: admin.rao }
+            publishedBy: { type: string, nullable: true }
+            publishedAt: { type: string, format: date-time, nullable: true }
+            retiredAt: { type: string, format: date-time, nullable: true }
+            retiredReason: { type: string, nullable: true }
+            servingState:
+              type: string
+              enum: [ACTIVE, SCHEDULED, SUPERSEDED, DRAFT, RETIRED]
+              description: Computed at read time. ACTIVE = the PUBLISHED version with the highest effectiveDate <= today for its documentKey.
+
+    PolicyLibraryItem:
+      type: object
+      properties:
+        documentKey: { type: string, example: VEHICLE-TNC }
+        title: { type: string }
+        documentType: { $ref: "#/components/schemas/KnowledgeDocumentType" }
+        audience: { $ref: "#/components/schemas/Audience" }
+        activeVersion: { type: string, nullable: true, example: "2026.3" }
+        activeEffectiveDate: { type: string, format: date, nullable: true }
+        scheduledVersion: { type: string, nullable: true, example: "2026.4" }
+        scheduledEffectiveDate: { type: string, format: date, nullable: true }
+        draftCount: { type: integer }
+        totalVersions: { type: integer }
+
+    PolicyAnswer:
+      type: object
+      description: VERBATIM from brief Module 2 Expected Output.
+      required: [answer, confidence, sources, followUpRequired]
+      properties:
+        answer: { type: string, example: "Foreclosure is allowed after 6 EMIs, with a 2% charge on the outstanding principal." }
+        confidence: { $ref: "#/components/schemas/Confidence" }
+        sources:
+          type: array
+          items:
+            type: object
+            required: [document, section, version, effectiveDate]
+            properties:
+              document: { type: string, example: "Vehicle Loan Terms and Conditions" }
+              section: { type: string, example: "Foreclosure and Part-Prepayment" }
+              version: { type: string, example: "2026.3" }
+              effectiveDate: { type: string, format: date, example: "2026-07-01" }
+        followUpRequired: { type: boolean }
+
+    # ---- Module 3 ----
+    AgentRecommendation:
+      type: object
+      description: VERBATIM from brief Module 3 Expected Output.
+      required: [applicationId, recommendation, riskBand, checks, missingDocuments, customerMessage, requiresHumanApproval, auditTrailId]
+      properties:
+        applicationId: { type: string, example: LA-2026-00418 }
+        recommendation: { $ref: "#/components/schemas/Recommendation" }
+        riskBand: { $ref: "#/components/schemas/RiskBand" }
+        checks:
+          type: array
+          items:
+            type: object
+            required: [agent, result, detail]
+            properties:
+              agent: { type: string, enum: [DocumentVerificationAgent, CreditAssessmentAgent, ComplianceAgent, CustomerCommunicationAgent, OrchestratorAgent] }
+              result: { $ref: "#/components/schemas/CheckResult" }
+              detail: { type: string, example: "Obligation ratio is 38% (limit 50%); credit score band is 720-760" }
+        missingDocuments:
+          type: array
+          items: { type: string, example: "Address proof" }
+        customerMessage: { type: string, example: "Please upload a valid address proof to continue your application." }
+        requiresHumanApproval: { type: boolean }
+        auditTrailId: { type: string, example: AUD-2026-77301 }
+
+    AuditTrail:
+      type: object
+      properties:
+        auditTrailId: { type: string }
+        applicationId: { type: string }
+        startedAt: { type: string, format: date-time }
+        completedAt: { type: string, format: date-time }
+        events:
+          type: array
+          items:
+            type: object
+            required: [sequence, timestamp, agent, eventType]
+            properties:
+              sequence: { type: integer }
+              timestamp: { type: string, format: date-time }
+              agent: { type: string }
+              eventType: { type: string, enum: [AGENT_START, TOOL_CALL, TOOL_RESULT, LLM_CALL, LLM_RESULT, PERMISSION_DENIED, AGENT_END, HUMAN_REQUIRED, POLICY_DRAFTED, POLICY_PUBLISHED, POLICY_RETIRED] }
+              toolName: { type: string, nullable: true }
+              input: { type: object, additionalProperties: true, description: PAN/Aadhaar/account numbers masked }
+              output: { type: object, additionalProperties: true, description: PAN/Aadhaar/account numbers masked }
+              durationMs: { type: integer }

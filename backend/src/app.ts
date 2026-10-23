@@ -4,6 +4,7 @@ import { aiRouter } from './ai/index';
 import { authRouter } from './core/auth/router';
 import { productRouter } from './core/product/router';
 import { emiRouter } from './core/emi/router';
+import { customerRouter } from './core/customer/router';
 import { notFound, errorHandler } from './common/errors';
 
 export function createApp(): Express {
@@ -16,6 +17,7 @@ export function createApp(): Express {
   app.use('/api/auth', authRouter);
   app.use('/api/products', productRouter);
   app.use('/api/emi', emiRouter);
+  app.use('/api/customers', customerRouter);
 
   // AI router (owned by S2)
   app.use('/api', aiRouter);

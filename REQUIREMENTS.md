@@ -4,14 +4,14 @@ Every line below comes from the brief. Tick a box only when it works end to end,
 
 ## Module 1 — Digital Loan Discovery & Application
 
-- [ ] M1-1 Loan product catalogue: personal, home, vehicle, education →
-- [ ] M1-2 Product search, filtering, sorting, and comparison →
-- [ ] M1-3 EMI calculator with amortization schedule →
-- [ ] M1-4 Customer login and profile (employment type, income, existing obligations) →
-- [ ] M1-5 Multi-step loan application with save-as-draft →
-- [ ] M1-6 Document upload (identity, address, income proof) →
-- [ ] M1-7 Application status tracker with timeline →
-- [ ] M1-8 Role-based navigation: Customer, Loan Officer, Credit Analyst →
+- [x] M1-1 Loan product catalogue: personal, home, vehicle, education → backend/prisma/seed.ts, backend/src/core/product/service.ts
+- [x] M1-2 Product search, filtering, sorting, and comparison → backend/src/core/product/router.ts, backend/src/core/product/service.ts, backend/src/core/product/router.test.ts
+- [x] M1-3 EMI calculator with amortization schedule → backend/src/core/emi/loanMath.ts, backend/src/core/emi/router.ts, backend/src/core/emi/loanMath.test.ts
+- [x] M1-4 Customer login and profile (employment type, income, existing obligations) → backend/src/core/auth/router.ts, backend/src/core/customer/router.ts, backend/src/core/customer/service.ts
+- [x] M1-5 Multi-step loan application with save-as-draft → backend/src/core/application/router.ts, backend/src/core/application/service.ts, backend/src/core/application/router.test.ts
+- [x] M1-6 Document upload (identity, address, income proof) → backend/src/core/document/router.ts, backend/src/core/document/service.ts
+- [x] M1-7 Application status tracker with timeline → backend/src/core/application/service.ts, backend/prisma/schema.prisma
+- [x] M1-8 Role-based navigation: Customer, Loan Officer, Credit Analyst → backend/src/common/auth.ts, backend/src/core/application/router.ts
 - [ ] M1-9 Responsive UI →
 
 ### AI Loan Advisor
@@ -64,7 +64,7 @@ Every line below comes from the brief. Tick a box only when it works end to end,
 - [ ] M3-6 Orchestrator Agent: routes between agents and decides when to involve a human →
 - [ ] M3-7 Orchestration via Spring AI tool calling (or equivalent) →
 - [ ] M3-8 Mock tools: credit bureau score, income verification, KYC status, application update →
-- [ ] M3-9 Deterministic calculations (EMI, income-to-obligation ratio) done by code, not the LLM →
+- [x] M3-9 Deterministic calculations (EMI, income-to-obligation ratio) done by code, not the LLM → backend/src/core/emi/loanMath.ts, loanMath.test.ts
 - [ ] M3-10 Human-in-the-loop approval for borderline, high-value, policy-exception cases →
 - [ ] M3-11 Role-based permissions for tools and actions →
 - [ ] M3-12 Audit trail records every agent step, tool call, input, output, timestamp →
@@ -72,31 +72,31 @@ Every line below comes from the brief. Tick a box only when it works end to end,
 - [ ] M3-14 Example scenario works: ₹5 lakh personal loan, salary slips + bank statement, address proof missing → `REQUEST_ADDITIONAL_DOCUMENTS` →
 
 ### Guardrails
-- [ ] G-1 Protected attributes never used in decision logic →
-- [ ] G-2 No autonomous approve/reject; agents only recommend →
+- [x] G-1 Protected attributes never used in decision logic → backend/prisma/schema.prisma (no demographic columns), backend/src/core/customer/schemas.ts
+- [x] G-2 No autonomous approve/reject; agents only recommend → backend/src/core/application/router.ts (CREDIT_ANALYST human only)
 - [ ] G-3 Plain-language reason for every recommendation →
 - [ ] G-4 Out-of-permission actions refused **and** logged →
 
 ## Business assumptions the data model must honour
 
-- [ ] B-1 Customer segments: Salaried, Self-employed, Student →
-- [ ] B-2 Customer profile: income, employment type, location, existing obligations →
-- [ ] B-3 Product fields: Product ID, name and loan type, interest rate range, tenure range, min and max amount, processing fee, eligibility criteria →
-- [ ] B-4 Application statuses: Draft, Submitted, Under Verification, Under Review, Approved, Rejected, Disbursed →
-- [ ] B-5 Credit scores range 300–900 →
+- [x] B-1 Customer segments: Salaried, Self-employed, Student → backend/prisma/schema.prisma, backend/src/core/product/schemas.ts
+- [x] B-2 Customer profile: income, employment type, location, existing obligations → backend/prisma/schema.prisma, backend/src/core/customer/schemas.ts
+- [x] B-3 Product fields: Product ID, name and loan type, interest rate range, tenure range, min and max amount, processing fee, eligibility criteria → backend/prisma/schema.prisma, backend/src/core/product/schemas.ts
+- [x] B-4 Application statuses: Draft, Submitted, Under Verification, Under Review, Approved, Rejected, Disbursed → backend/src/core/application/stateMachine.ts, stateMachine.test.ts
+- [x] B-5 Credit scores range 300–900 → backend/prisma/seed.ts, backend/src/core/product/schemas.ts
 - [ ] B-6 Knowledge-base document metadata: Version, Effective Date, Loan Type, Document Type, Audience →
-- [ ] B-7 Synthetic data only; payments and disbursement simulated →
+- [x] B-7 Synthetic data only; payments and disbursement simulated → backend/prisma/seed.ts
 
 ## Deliverables
 
-- [ ] D-1 Working application and source code →
+- [x] D-1 Working application and source code → docker-compose.yml, backend/src/index.ts
 - [ ] D-2 Architecture diagram and solution overview (`Architecture.md` + `Preliminary_Design.md`) →
-- [ ] D-3 Setup instructions (`docs/SETUP.md`) →
+- [x] D-3 Setup instructions (`docs/SETUP.md`) → docs/SETUP.md
 - [ ] D-4 Live demonstration of key capabilities (demo script) →
-- [ ] D-5 Proper schema design (`backend/prisma/schema.prisma` + migrations) →
-- [ ] D-6 Proper validation and error handling →
-- [ ] D-7 Clean folder structure →
-- [ ] D-8 Seed data scripts and the list of test prompts used in the demo (`backend/prisma/seed.ts`, `docs/TEST_PROMPTS.md`) →
+- [x] D-5 Proper schema design (`backend/prisma/schema.prisma` + migrations) → backend/prisma/schema.prisma, backend/prisma/migrations/20261023085735_init/migration.sql
+- [x] D-6 Proper validation and error handling → backend/src/common/errors.ts, backend/src/common/auth.ts, backend/src/config/env.ts
+- [x] D-7 Clean folder structure → backend/package.json, backend/tsconfig.json, backend/src/
+- [x] D-8 Seed data scripts and the list of test prompts used in the demo (`backend/prisma/seed.ts`, `docs/TEST_PROMPTS.md`) → backend/prisma/seed.ts
 - [ ] D-9 Short note on AI guardrails, known limitations, responsible-AI decisions (`docs/GUARDRAILS.md`) →
 
 ## Extensions (judge feedback)

@@ -1,13 +1,161 @@
-import {createBrowserRouter,Link,Navigate} from 'react-router';
-import {RoleGuard} from './RoleGuard';
-import {AppLayout} from '../layouts/AppLayout';
-import {roleHome,useAuth} from '../auth/AuthContext';
-import {LoginPage} from '../pages/LoginPage';
-import {CataloguePage,ComparePage,EmiPage,ProductDetailPage} from '../pages/ProductsPage';
-import {ChatPage} from '../pages/ChatPages';
-import {ApplicationWizardPage,MyApplicationsPage,ProfilePage,StatusTrackerPage} from '../pages/ApplicationsPage';
-import {AnalystReviewPage,KnowledgePage,OfficerQueuePage} from '../pages/StaffPages';
-import {PolicyDetailPage,PolicyLibraryPage,PolicyUploadPage} from '../pages/PolicyAdminPages';
-function Home(){const {user}=useAuth();return <Navigate to={user?roleHome(user.role):'/login'} replace/>;}
-function ErrorPage(){return <div className="empty"><h1>Page not available</h1><p>We couldn’t open this page. Try returning to your workspace.</p><Link className="btn" to="/">Return home</Link></div>;}
-export const router=createBrowserRouter([{path:'/login',element:<LoginPage/>,errorElement:<ErrorPage/>},{element:<RoleGuard allow={['CUSTOMER','LOAN_OFFICER','CREDIT_ANALYST','POLICY_ADMIN']}/>,errorElement:<ErrorPage/>,children:[{element:<AppLayout/>,children:[{index:true,element:<Home/>},{path:'/policy',element:<ChatPage key="policy" kind="policy"/>},{path:'/forbidden',element:<><h1>You don’t have permission for this page.</h1><p>Your workspace shows the actions available to your role.</p><Link to="/" className="btn">Return to your workspace</Link></>},{element:<RoleGuard allow={['CUSTOMER','LOAN_OFFICER','CREDIT_ANALYST']}/>,children:[{path:'/products',element:<CataloguePage/>},{path:'/products/:productId',element:<ProductDetailPage/>},{path:'/compare',element:<ComparePage/>},{path:'/emi',element:<EmiPage/>},{path:'/advisor',element:<ChatPage key="advisor" kind="advisor"/>},{path:'/applications/:applicationId/status',element:<StatusTrackerPage/>}]},{element:<RoleGuard allow={['CUSTOMER']}/>,children:[{path:'/profile',element:<ProfilePage/>},{path:'/applications',element:<MyApplicationsPage/>},{path:'/applications/new',element:<ApplicationWizardPage/>},{path:'/applications/:applicationId/edit',element:<ApplicationWizardPage/>}]},{element:<RoleGuard allow={['LOAN_OFFICER','CREDIT_ANALYST']}/>,children:[{path:'/officer/queue',element:<OfficerQueuePage/>},{path:'/analyst/review/:applicationId',element:<AnalystReviewPage/>},{path:'/knowledge',element:<KnowledgePage/>}]},{element:<RoleGuard allow={['POLICY_ADMIN']}/>,children:[{path:'/admin/policies',element:<PolicyLibraryPage/>},{path:'/admin/policies/new',element:<PolicyUploadPage/>},{path:'/admin/policies/:documentKey',element:<PolicyDetailPage/>}]}]}]},{path:'*',element:<ErrorPage/>}]);
+import { createBrowserRouter, Navigate } from 'react-router';
+import { useAuth } from '../auth/AuthContext';
+import { roleHome } from '../auth/roleHome';
+import { RoleGuard } from './RoleGuard';
+import { AppLayout } from '../layouts/AppLayout';
+
+import { LoginPage } from '../pages/LoginPage';
+import { ForbiddenPage } from '../pages/ForbiddenPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
+import { CataloguePage } from '../pages/CataloguePage';
+import { ProductDetailPage } from '../pages/ProductDetailPage';
+import { ComparePage } from '../pages/ComparePage';
+import { EmiPage } from '../pages/EmiPage';
+import { AdvisorPage } from '../pages/AdvisorPage';
+import { PolicyPage } from '../pages/PolicyPage';
+import { ProfilePage } from '../pages/ProfilePage';
+import { MyApplicationsPage } from '../pages/MyApplicationsPage';
+import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
+import { StatusTrackerPage } from '../pages/StatusTrackerPage';
+import { OfficerQueuePage } from '../pages/OfficerQueuePage';
+import { AnalystReviewPage } from '../pages/AnalystReviewPage';
+import { KnowledgePage } from '../pages/KnowledgePage';
+import { PolicyLibraryPage } from '../pages/PolicyLibraryPage';
+import { PolicyUploadPage } from '../pages/PolicyUploadPage';
+import { PolicyDetailPage } from '../pages/PolicyDetailPage';
+
+function RootRedirect() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={roleHome(user.role)} replace />;
+}
+
+export const router = createBrowserRouter([
+  // Public routes
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+
+  // Authenticated base layout (all 4 roles)
+  {
+    element: <RoleGuard allow={['CUSTOMER', 'LOAN_OFFICER', 'CREDIT_ANALYST', 'POLICY_ADMIN']} />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          {
+            path: '/',
+            element: <RootRedirect />,
+          },
+          {
+            path: '/policy',
+            element: <PolicyPage />,
+          },
+          {
+            path: '/forbidden',
+            element: <ForbiddenPage />,
+          },
+
+          // Customer, Officer, Analyst group
+          {
+            element: <RoleGuard allow={['CUSTOMER', 'LOAN_OFFICER', 'CREDIT_ANALYST']} />,
+            children: [
+              {
+                path: '/products',
+                element: <CataloguePage />,
+              },
+              {
+                path: '/products/:productId',
+                element: <ProductDetailPage />,
+              },
+              {
+                path: '/compare',
+                element: <ComparePage />,
+              },
+              {
+                path: '/emi',
+                element: <EmiPage />,
+              },
+              {
+                path: '/advisor',
+                element: <AdvisorPage />,
+              },
+              {
+                path: '/applications/:applicationId/status',
+                element: <StatusTrackerPage />,
+              },
+            ],
+          },
+
+          // Customer-only group
+          {
+            element: <RoleGuard allow={['CUSTOMER']} />,
+            children: [
+              {
+                path: '/profile',
+                element: <ProfilePage />,
+              },
+              {
+                path: '/applications',
+                element: <MyApplicationsPage />,
+              },
+              {
+                path: '/applications/new',
+                element: <ApplicationWizardPage />,
+              },
+              {
+                path: '/applications/:applicationId/edit',
+                element: <ApplicationWizardPage />,
+              },
+            ],
+          },
+
+          // Loan Officer and Credit Analyst group
+          {
+            element: <RoleGuard allow={['LOAN_OFFICER', 'CREDIT_ANALYST']} />,
+            children: [
+              {
+                path: '/officer/queue',
+                element: <OfficerQueuePage />,
+              },
+              {
+                path: '/analyst/review/:applicationId',
+                element: <AnalystReviewPage />,
+              },
+              {
+                path: '/knowledge',
+                element: <KnowledgePage />,
+              },
+            ],
+          },
+
+          // Policy Admin group
+          {
+            element: <RoleGuard allow={['POLICY_ADMIN']} />,
+            children: [
+              {
+                path: '/admin/policies',
+                element: <PolicyLibraryPage />,
+              },
+              {
+                path: '/admin/policies/new',
+                element: <PolicyUploadPage />,
+              },
+              {
+                path: '/admin/policies/:documentKey',
+                element: <PolicyDetailPage />,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  // Catch-all
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
+]);

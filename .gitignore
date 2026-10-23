@@ -1,0 +1,16 @@
+.env
+*.log
+node_modules/
+dist/
+target/
+build/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+docs/full-stack/
+docs/full-stack.zip
+backend/.mvn/wrapper/*.jar
+frontend/.vite/
+backend/.cache/
+backend/uploads/

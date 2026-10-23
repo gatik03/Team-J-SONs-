@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk grep *)",
+      "Bash(sed -n '/^## 2. Auth and roles/,/^## 3/p' Integration_Contracts.md)"
+    ]
+  }
+}

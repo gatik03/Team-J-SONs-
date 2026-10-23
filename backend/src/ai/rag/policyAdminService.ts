@@ -53,7 +53,8 @@ export async function listLibrary(today = todayIso()): Promise<PolicyLibraryItem
   const active = new Set(await inForceIds(today));
   const byKey = new Map<string, Row[]>();
   for (const r of rows) byKey.set(r.documentKey, [...(byKey.get(r.documentKey) ?? []), r]);
-  return [...byKey].map(([documentKey, rs]) => {
+  const lastPublished = (rs: Row[]) => Math.max(0, ...rs.map((r) => r.publishedAt?.getTime() ?? 0));
+  return [...byKey].sort(([, a], [, b]) => lastPublished(b) - lastPublished(a) || a[0]!.title.localeCompare(b[0]!.title)).map(([documentKey, rs]) => {
     const newest = rs[0]!;   // rows are newest first
     const act = rs.find((r) => servingStateOf(r, active, today) === 'ACTIVE');
     const sched = rs.filter((r) => servingStateOf(r, active, today) === 'SCHEDULED').at(-1);   // earliest effectiveDate
@@ -63,7 +64,7 @@ export async function listLibrary(today = todayIso()): Promise<PolicyLibraryItem
       scheduledVersion: sched?.version ?? null, scheduledEffectiveDate: sched ? ymd(sched.effectiveDate) : null,
       draftCount: rs.filter((r) => r.status === 'DRAFT').length, totalVersions: rs.length,
     };
-  }).sort((a, b) => a.title.localeCompare(b.title));
+  });
 }
 
 export async function listVersions(documentKey: string, today = todayIso()): Promise<PolicyVersionDto[]> {

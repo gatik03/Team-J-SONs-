@@ -3,7 +3,7 @@ import { prisma } from '../../common/prisma';
 import { recordPolicyEvent } from '../audit/auditService';
 import { embedDocuments } from './embeddings';
 import type { KbMeta } from './ingest';
-import { listVersions, publishVersion, retireVersion, uploadDraft } from './policyAdminService';
+import { listLibrary, listVersions, publishVersion, retireVersion, uploadDraft } from './policyAdminService';
 
 vi.mock('./embeddings', () => ({ embedDocuments: vi.fn(async (t: string[]) => t.map(() => Array(768).fill(1 / Math.sqrt(768)))), embedQuery: vi.fn() }));
 vi.mock('../audit/auditService', () => ({ recordPolicyEvent: vi.fn(async () => 'AUD-POL-00001') }));
@@ -28,6 +28,15 @@ describe.skipIf(!process.env.DATABASE_URL)('policyAdminService (Postgres, no net
     await expect(publishVersion(d.documentId, 'admin.rao')).rejects.toMatchObject({ status: 409, code: 'INVALID_STATE' });
     await retireVersion(d.documentId, 'Wrong charge published', 'admin.rao');
     await expect(publishVersion(d.documentId, 'admin.rao')).rejects.toMatchObject({ status: 409, code: 'INVALID_STATE' });
+  });
+
+  it('puts the latest publication first regardless of title and effective date', async () => {
+    const d = await draft('1.0', '2020-01-01');
+    await publishVersion(d.documentId, 'admin.rao');
+    await prisma.kbDocument.update({ where: { id: d.documentId }, data: { title: 'ZZZ Latest Publication', publishedAt: new Date('2099-01-01') } });
+    const library = await listLibrary('2026-10-23');
+    expect(library[0].documentKey).toBe(KEY);
+    expect(library[0].activeEffectiveDate).toBe('2020-01-01');
   });
 
   it('2. retire requires a reason and a PUBLISHED row', async () => {
